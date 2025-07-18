@@ -78,6 +78,7 @@ fun StatusBarNotification.icon(): TimelineIcon = when(packageName) {
     "kik.android" -> TimelineIcon.NotificationKik
     "com.kakao.talk" -> TimelineIcon.NotificationKakaoTalk
     "com.beeper.android" -> TimelineIcon.GenericSms
+    "ch.protonmail.android" -> TimelineIcon.GenericEmail
 
     else -> when (notification.category) {
         Notification.CATEGORY_EMAIL -> TimelineIcon.GenericEmail
