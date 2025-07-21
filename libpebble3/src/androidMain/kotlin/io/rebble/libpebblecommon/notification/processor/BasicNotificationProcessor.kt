@@ -79,6 +79,10 @@ fun StatusBarNotification.icon(): TimelineIcon = when(packageName) {
     "com.kakao.talk" -> TimelineIcon.NotificationKakaoTalk
     "com.beeper.android" -> TimelineIcon.GenericSms
     "ch.protonmail.android" -> TimelineIcon.GenericEmail
+    "me.proton.android.calendar" -> TimelineIcon.TimelineCalendar
+    "com.google.android.apps.walletnfcrel" -> TimelineIcon.PayBill
+    "com.google.android.youtube" -> TimelineIcon.TvShow // Use until the YouTube icon is in the fw repo
+    "app.revanced.android.youtube" -> TimelineIcon.TvShow // Use until the YouTube icon is in the fw repo
 
     else -> when (notification.category) {
         Notification.CATEGORY_EMAIL -> TimelineIcon.GenericEmail
