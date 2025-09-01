@@ -44,6 +44,7 @@ actual val platformModule: Module = module {
 //                ProtocolCapsFlag.SupportsWorkoutApp,
 //                ProtocolCapsFlag.SupportsSmoothFwInstallProgress,
 //                ProtocolCapsFlag.SupportsFwUpdateAcrossDisconnection,
+                ProtocolCapsFlag.SupportsAppDictation
             )
         )
     }

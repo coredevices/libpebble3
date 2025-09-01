@@ -63,6 +63,7 @@ data class WatchConfig(
     val enableHealth: Boolean = true,
     val ignoreMissingPrf: Boolean = false,
     val lanDevConnection: Boolean = false,
+    val speechRecognitionLanguage: String? = null,
 )
 
 class WatchConfigFlow(val flow: StateFlow<LibPebbleConfig>) {
