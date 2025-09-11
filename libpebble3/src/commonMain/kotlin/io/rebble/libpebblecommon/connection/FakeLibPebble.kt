@@ -314,19 +314,18 @@ class FakeConnectedDevice(
     override val firmwareUpdateState: FirmwareUpdater.FirmwareUpdateStatus,
     override val name: String,
     override val nickname: String?,
-) : ConnectedPebbleDevice {
-    override val runningFwVersion: String = "v1.2.3-core"
-    override val serial: String = "XXXXXXXXXXXX"
-    override val lastConnected: Instant = Instant.DISTANT_PAST
-    override val watchType: WatchHardwarePlatform = WatchHardwarePlatform.CORE_ASTERIX
     override val color: WatchColor = run {
-        val white = Random.nextBoolean()
-        if (white) {
-            WatchColor.Pebble2DuoWhite
-        } else {
-            WatchColor.Pebble2DuoBlack
-        }
-    }
+       val white = Random.nextBoolean()
+       if (white) {
+         WatchColor.Pebble2DuoWhite
+       } else {
+         WatchColor.Pebble2DuoBlack
+       }
+    },
+    override val watchType: WatchHardwarePlatform = WatchHardwarePlatform.CORE_ASTERIX,
+    override val lastConnected: Instant = Instant.DISTANT_PAST, override val serial: String = "XXXXXXXXXXXX",
+    override val runningFwVersion: String = "v1.2.3-core",
+) : ConnectedPebbleDevice {
 
     override fun forget() {}
     override fun setNickname(nickname: String?) {
@@ -359,7 +358,7 @@ class FakeConnectedDevice(
     override val watchInfo: WatchInfo = WatchInfo(
         runningFwVersion = FirmwareVersion.from(runningFwVersion, isRecovery = false, gitHash = "", timestamp = kotlin.time.Instant.DISTANT_PAST)!!,
         recoveryFwVersion = FirmwareVersion.from(runningFwVersion, isRecovery = true, gitHash = "", timestamp = kotlin.time.Instant.DISTANT_PAST)!!,
-        platform = WatchHardwarePlatform.CORE_ASTERIX,
+        platform = watchType,
         bootloaderTimestamp = kotlin.time.Instant.DISTANT_PAST,
         board = "board",
         serial = serial,
