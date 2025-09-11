@@ -23,6 +23,12 @@ jobs:
             ~/.konan/cache
             ~/.konan/dependencies
           key: build-deps-${{ runner.os }}-${{ hashFiles('gradle/**', 'gradlew*', 'gradle.properties', '*.gradle*') }}
+      - name: Set up Xcode
+        run: |
+          ls /Applications/Xcode*
+          swift --version
+          sudo xcode-select --switch /Applications/Xcode_16.2.app/Contents/Developer
+          gem install xcpretty
       - name: Build
         run: ./gradlew linkDebugFrameworkIosArm64 assembleDebug
       - name: Test
