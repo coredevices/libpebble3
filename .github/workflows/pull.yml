@@ -29,6 +29,8 @@ jobs:
           swift --version
           sudo xcode-select --switch /Applications/Xcode_16.2.app/Contents/Developer
           gem install xcpretty
+      - name: Set up Swift
+        uses: swift-actions/setup-swift@v2.2.0
       - name: Build
         run: ./gradlew linkDebugFrameworkIosArm64 assembleDebug
       - name: Test
