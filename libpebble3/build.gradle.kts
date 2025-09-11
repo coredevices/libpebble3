@@ -117,12 +117,12 @@ kotlin {
             }
         }
         commonMain.dependencies {
-            implementation(libs.coroutines)
+            api(libs.coroutines)
             implementation(libs.serialization)
             implementation(libs.kermit)
             implementation(libs.room.runtime)
             implementation(libs.sqlite.bundled)
-            implementation(libs.kotlinx.io.core)
+            api(libs.kotlinx.io.core)
             implementation(libs.kotlinx.io.okio)
             implementation(libs.okio)
             // Using our forked version (in a submodule) which has a fix for iOS reads not working
@@ -132,7 +132,7 @@ kotlin {
             implementation(libs.ktor.server.core)
             implementation(libs.ktor.server.cio)
             implementation(libs.ktor.server.websockets)
-            implementation(libs.kotlinx.datetime)
+            api(libs.kotlinx.datetime)
             implementation(libs.koin.core)
             implementation(compose.ui)
             implementation(project(":blobannotations"))
