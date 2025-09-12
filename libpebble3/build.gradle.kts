@@ -75,6 +75,23 @@ kotlin {
     }
 
     jvm()
+
+    val xcodeExists by lazy { // Define xcodeExists and xcodeDir here to be accessible by iOS targets
+        project.providers.exec {
+            isIgnoreExitValue = true
+            commandLine("which", "xcode-select")
+        }.result.get().exitValue == 0
+    }
+    val xcodeDir by lazy {
+        if (xcodeExists) {
+            project.providers.exec {
+                commandLine("xcode-select", "-p")
+            }.standardOutput.asText.get().trim()
+        } else {
+            ""
+        }
+    }
+
     listOf(
         iosX64(),
         iosArm64(),
@@ -91,6 +108,9 @@ kotlin {
         }
         target.binaries.all {
             linkerOpts("-framework", "LibPebbleSwift", "-F"+dir.absolutePath)
+            if (xcodeExists) {
+                linkerOpts("-L$xcodeDir/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos")
+            }
         }
     }
 
