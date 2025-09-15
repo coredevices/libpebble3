@@ -1,6 +1,6 @@
 # libpebble3
 
-libpebble3 is a kotlin multiplatform library for interacting with Pebble devices. It is designed to do everything that a Pebble/Core watch companion app needs to do, except for the UI and and specific web services.
+libpebble3 is a kotlin multiplatform library for interacting with Pebble devices. It is designed to do everything that a Pebble/Core watch companion app needs to do, except for the UI and specific web services.
 
 This includes: connection management/bluetooth on all supported platforms, notification listener/processing, timeline, blobdb storage/management, firmware updating, PebbleKit JS, music control, etc etc. A "host" app using this library will only need to provide a UI and implementations to fetch things like the app locker (likely via web services). The library will do everything else in the background.
 
@@ -16,7 +16,7 @@ In the future we envisage supporting more targets, but today only iOS/Android ar
 
 # Contributing
 
-We aren't actively encouraging contributions yet, while we are agressively building out feature parity with the original Pebble apps. CI testing is not comprehensive, so changes need to be manually tested with real hardware using CoreApp, and our roadmap/bug tracker is not currently on github. We will update when this changes.
+We aren't actively encouraging contributions yet, while we are aggressively building out feature parity with the original Pebble apps. CI testing is not comprehensive, so changes need to be manually tested with real hardware using CoreApp, and our roadmap/bug tracker is not currently on github. We will update when this changes.
 
 # Development Guidelines
 
@@ -24,7 +24,7 @@ We aren't actively encouraging contributions yet, while we are agressively build
 
 - We share a version catalog with CoreApp to avoid duplicating definitions. This means a few extra library entries which are not used in libpebble (so they can share the version definition).
 - Use `optIn` in `build.gradle.kts` rather than individual source files.
-- Only use injected coroutine scopes: either LibPebbleCoroutineScope (insteads of GlobalScope) or ConnectionCoroutineScope (scoped per-connection).
+- Only use injected coroutine scopes: either LibPebbleCoroutineScope (instead of GlobalScope) or ConnectionCoroutineScope (scoped per-connection).
 
 Connection:
 - Services are scoped to the connection. Their main job is to translate raw pebble protocol messages to something readable by the rest of the app.
