@@ -11,12 +11,22 @@ import android.os.UserHandle
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import co.touchlab.kermit.Logger
+import io.rebble.libpebblecommon.LibPebbleConfigHolder
+import io.rebble.libpebblecommon.connection.ConnectedPebbleDevice
+import io.rebble.libpebblecommon.connection.LibPebble
+import io.rebble.libpebblecommon.connection.Watches
 import io.rebble.libpebblecommon.database.entity.ChannelGroup
 import io.rebble.libpebblecommon.database.entity.ChannelItem
 import io.rebble.libpebblecommon.database.entity.MuteState
 import io.rebble.libpebblecommon.di.LibPebbleKoinComponent
 import io.rebble.libpebblecommon.io.rebble.libpebblecommon.notification.AndroidPebbleNotificationListenerConnection
 import io.rebble.libpebblecommon.io.rebble.libpebblecommon.notification.NotificationHandler
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import org.koin.core.component.get
 import kotlin.uuid.Uuid
 
@@ -28,6 +38,8 @@ class LibPebbleNotificationListener : NotificationListenerService(), LibPebbleKo
 
     private var warnedAboutNotificationchannelsPermission = false
 
+    private var notificationListenerScope = MainScope()
+
     override fun onCreate() {
         super.onCreate()
         logger.v { "onCreate: ($this)" }
@@ -35,6 +47,10 @@ class LibPebbleNotificationListener : NotificationListenerService(), LibPebbleKo
 
     private val notificationHandler: NotificationHandler = get()
     private val connection: AndroidPebbleNotificationListenerConnection = get()
+
+    private val configHolder: LibPebbleConfigHolder = get()
+
+    private val watches: Watches = get<LibPebble>()
 
     fun cancelNotification(itemId: Uuid) {
         val sbn = notificationHandler.getNotification(itemId) ?: return
@@ -54,6 +70,10 @@ class LibPebbleNotificationListener : NotificationListenerService(), LibPebbleKo
         // be done twice.
         logger.d { "onListenerConnected() ($this)" }
         connection.setService(this)
+
+        notificationListenerScope = MainScope()
+        controlListenerHints()
+
 //        try {
 //            notificationHandler.setActiveNotifications(getActiveNotifications().toList())
 //        } catch (e: SecurityException) {
@@ -64,6 +84,7 @@ class LibPebbleNotificationListener : NotificationListenerService(), LibPebbleKo
     override fun onListenerDisconnected() {
         logger.d { "onListenerDisconnected() ($this)" }
         connection.setService(null)
+        notificationListenerScope.cancel()
     }
 
     override fun onNotificationChannelModified(
@@ -143,5 +164,29 @@ class LibPebbleNotificationListener : NotificationListenerService(), LibPebbleKo
         reason: Int
     ) {
         notificationHandler.handleNotificationRemoved(sbn)
+    }
+
+    private fun controlListenerHints() = notificationListenerScope.launch {
+        val anyWatchConnected = watches.watches
+            .map { watchList -> watchList.any { it is ConnectedPebbleDevice } }
+            .distinctUntilChanged()
+
+        val notificationConfig = configHolder.config.map { it.notificationConfig }
+            .distinctUntilChanged()
+
+        combine(anyWatchConnected, notificationConfig) { connected, config ->
+            var listenerHints = 0
+            if (connected && config.mutePhoneNotificationSoundsWhenConnected) {
+                listenerHints = listenerHints or HINT_HOST_DISABLE_NOTIFICATION_EFFECTS
+            }
+
+            if (connected && config.mutePhoneCallSoundsWhenConnected) {
+                listenerHints = listenerHints or HINT_HOST_DISABLE_CALL_EFFECTS
+            }
+
+            listenerHints
+        }.distinctUntilChanged().collect {
+            requestListenerHints(it)
+        }
     }
 }
