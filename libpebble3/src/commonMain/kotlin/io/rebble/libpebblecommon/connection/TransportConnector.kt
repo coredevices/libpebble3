@@ -280,4 +280,6 @@ private val FW_3_0_0 = FirmwareVersion(
     suffix = null,
     gitHash = "",
     isRecovery = false,
+    isSlot0 = false,
+    isDualSlot = false,
 )

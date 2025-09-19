@@ -362,6 +362,8 @@ fun PbzManifest.asFirmwareVersion(): FirmwareVersion? {
         tag = versionTag,
         isRecovery = firmware.type == "recovery",
         gitHash = "",
-        timestamp = Instant.fromEpochMilliseconds(firmware.timestamp)
+        timestamp = Instant.fromEpochMilliseconds(firmware.timestamp),
+        isDualSlot = false, // FIXME
+        isSlot0 = false, // FIXME
     )
 }

@@ -391,11 +391,28 @@ enum class ProtocolCapsFlag(val value: Int) {
     }
 }
 
+enum class FirmwareProperty(val value: Int) {
+    IsRecoveryFirmware(0),
+    IsBleFirmware(1),
+    IsDualSlot(2),
+    IsSlot0(3),
+    ;
+
+    companion object {
+        fun fromFlags(flags: UByte): Set<FirmwareProperty> {
+            return entries.filter {
+                val positionInsideByte: Int = it.value
+                ((1u shl positionInsideByte) and flags.toUInt()) != 0u
+            }.toSet()
+        }
+    }
+}
+
 class WatchFirmwareVersion : StructMappable() {
     val timestamp = SUInt(m)
     val versionTag = SFixedString(m, 32)
     val gitHash = SFixedString(m, 8)
-    val isRecovery = SBoolean(m)
+    val flags = SUByte(m)
 
     /**
      * See [WatchHardwarePlatform]

@@ -8,6 +8,7 @@ import io.rebble.libpebblecommon.connection.PlatformFlags
 import io.rebble.libpebblecommon.di.ConnectionCoroutineScope
 import io.rebble.libpebblecommon.metadata.WatchColor
 import io.rebble.libpebblecommon.metadata.WatchHardwarePlatform
+import io.rebble.libpebblecommon.packets.FirmwareProperty
 import io.rebble.libpebblecommon.packets.PhoneAppVersion
 import io.rebble.libpebblecommon.packets.PingPong
 import io.rebble.libpebblecommon.packets.ProtocolCapsFlag
@@ -206,6 +207,8 @@ data class FirmwareVersion(
     val isRecovery: Boolean,
 //    val hardwarePlatform: ?
 //    val metadataVersion: ?
+    val isDualSlot: Boolean,
+    val isSlot0: Boolean,
 ) : Comparable<FirmwareVersion> {
     private fun code(): Int = patch + (minor * 1_000) + (major * 1_000_000)
 
@@ -228,7 +231,14 @@ data class FirmwareVersion(
     }
 
     companion object {
-        fun from(tag: String, isRecovery: Boolean, gitHash: String, timestamp: Instant): FirmwareVersion? {
+        fun from(
+            tag: String,
+            isRecovery: Boolean,
+            gitHash: String,
+            timestamp: Instant,
+            isDualSlot: Boolean,
+            isSlot0: Boolean,
+        ): FirmwareVersion? {
             val match = FIRMWARE_VERSION_REGEX.find(tag)
             if (match == null) {
                 Logger.w("Couldn't decode fw version: '$tag'")
@@ -247,17 +257,22 @@ data class FirmwareVersion(
                 suffix = suffix,
                 gitHash = gitHash,
                 isRecovery = isRecovery,
+                isDualSlot = isDualSlot,
+                isSlot0 = isSlot0,
             )
         }
     }
 }
 
 fun WatchFirmwareVersion.firmwareVersion(): FirmwareVersion? {
+    val properties = FirmwareProperty.fromFlags(flags.get())
     return FirmwareVersion.from(
         tag = versionTag.get(),
         gitHash = gitHash.get(),
-        isRecovery = isRecovery.get(),
+        isRecovery = properties.contains(FirmwareProperty.IsRecoveryFirmware),
         timestamp = Instant.fromEpochSeconds(timestamp.get().toLong()),
+        isDualSlot = properties.contains(FirmwareProperty.IsDualSlot),
+        isSlot0 = properties.contains(FirmwareProperty.IsSlot0),
     )
 }
 
