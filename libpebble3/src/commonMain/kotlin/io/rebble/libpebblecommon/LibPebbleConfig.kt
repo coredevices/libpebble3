@@ -95,6 +95,14 @@ data class NotificationConfig(
     val storeNotifiationsForDays: Int = 7,
     val addShowsUserInterfaceActions: Boolean = false,
     val alwaysSendNotifications: Boolean = true,
+    /**
+     * Mute all notification sounds on the phone when at least one watch is connected
+     */
+    val mutePhoneNotificationSoundsWhenConnected: Boolean = false,
+    /**
+     * Mute all call alerts on the phone when at least one watch is connected
+     */
+    val mutePhoneCallSoundsWhenConnected: Boolean = false,
 )
 
 class NotificationConfigFlow(val flow: StateFlow<LibPebbleConfig>) {
