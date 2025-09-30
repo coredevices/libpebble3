@@ -5,7 +5,6 @@ import androidx.room.Query
 import androidx.room.Transaction
 import io.rebble.libpebblecommon.database.entity.LockerEntry
 import io.rebble.libpebblecommon.database.entity.LockerEntryDao
-import io.rebble.libpebblecommon.locker.AppBasicProperties
 import io.rebble.libpebblecommon.locker.AppType
 import kotlinx.coroutines.flow.Flow
 import kotlin.uuid.Uuid
@@ -39,7 +38,7 @@ interface LockerEntryRealDao : LockerEntryDao {
     )
 
     @Query("""
-        SELECT id, type, title, developerName FROM LockerEntryEntity
+        SELECT id, type, title, developerName FROM LockerEntryEntity WHERE deleted = 0
     """)
     fun getAllBasicInfoFlow(): Flow<List<DbAppBasicProperties>>
 
