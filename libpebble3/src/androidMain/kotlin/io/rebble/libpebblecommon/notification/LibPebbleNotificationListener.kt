@@ -12,6 +12,7 @@ import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import co.touchlab.kermit.Logger
 import io.rebble.libpebblecommon.LibPebbleConfigHolder
+import io.rebble.libpebblecommon.NotificationConfigFlow
 import io.rebble.libpebblecommon.connection.ConnectedPebbleDevice
 import io.rebble.libpebblecommon.connection.LibPebble
 import io.rebble.libpebblecommon.connection.Watches
@@ -48,7 +49,7 @@ class LibPebbleNotificationListener : NotificationListenerService(), LibPebbleKo
     private val notificationHandler: NotificationHandler = get()
     private val connection: AndroidPebbleNotificationListenerConnection = get()
 
-    private val configHolder: LibPebbleConfigHolder = get()
+    private val configHolder: NotificationConfigFlow = get()
 
     private val watches: Watches = get<LibPebble>()
 
@@ -171,7 +172,7 @@ class LibPebbleNotificationListener : NotificationListenerService(), LibPebbleKo
             .map { watchList -> watchList.any { it is ConnectedPebbleDevice } }
             .distinctUntilChanged()
 
-        val notificationConfig = configHolder.config.map { it.notificationConfig }
+        val notificationConfig = configHolder.flow.map { it.notificationConfig }
             .distinctUntilChanged()
 
         combine(anyWatchConnected, notificationConfig) { connected, config ->
