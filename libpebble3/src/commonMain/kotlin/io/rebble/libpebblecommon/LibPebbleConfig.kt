@@ -102,6 +102,10 @@ data class NotificationConfig(
      * Mute all call alerts on the phone when at least one watch is connected
      */
     val mutePhoneCallSoundsWhenConnected: Boolean = false,
+    /**
+     * When [true], any notifications muted by the phone's do not disturb will not be forwarded to the watch
+     */
+    val respectDoNotDisturb: Boolean = false,
 )
 
 class NotificationConfigFlow(val flow: StateFlow<LibPebbleConfig>) {

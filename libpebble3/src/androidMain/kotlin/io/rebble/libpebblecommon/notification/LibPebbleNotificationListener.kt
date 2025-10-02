@@ -5,13 +5,13 @@ import android.app.NotificationChannelGroup
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.IBinder
 import android.os.Process
 import android.os.UserHandle
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import co.touchlab.kermit.Logger
-import io.rebble.libpebblecommon.LibPebbleConfigHolder
 import io.rebble.libpebblecommon.NotificationConfigFlow
 import io.rebble.libpebblecommon.connection.ConnectedPebbleDevice
 import io.rebble.libpebblecommon.connection.LibPebble
@@ -156,6 +156,10 @@ class LibPebbleNotificationListener : NotificationListenerService(), LibPebbleKo
     // Note (see above comments), if onListenerConnected was called twice, then so will this be, for
     // *every* notification. So - the handler must be resilient to this.
     override fun onNotificationPosted(sbn: StatusBarNotification) {
+        if (configHolder.value.respectDoNotDisturb && isNotificationFilteredByDoNotDisturb(sbn)) {
+            return
+        }
+
         notificationHandler.handleNotificationPosted(sbn)
     }
 
@@ -189,5 +193,13 @@ class LibPebbleNotificationListener : NotificationListenerService(), LibPebbleKo
         }.distinctUntilChanged().collect {
             requestListenerHints(it)
         }
+    }
+
+    fun isNotificationFilteredByDoNotDisturb(statusBarNotification: StatusBarNotification): Boolean {
+        val rankingMap = getCurrentRanking() ?: return false
+
+        val ranking = Ranking()
+        return rankingMap.getRanking(statusBarNotification.getKey(), ranking) &&
+                !ranking.matchesInterruptionFilter()
     }
 }
