@@ -49,7 +49,8 @@ class BasicNotificationProcessor(
         val body = bigText ?: text ?: ""
         val people = sbn.notification.people()
         val contactKeys = people.asContacts(context.context)
-        val color = sbn.notification.color.takeIf { it != 0 && it != 0xFF000000.toInt() }
+        val color = HardcodedNotificationColors.packageColorMap[sbn.packageName]
+            ?: sbn.notification.color.takeIf { it != 0 && it != 0xFF000000.toInt() }
         val notification = LibPebbleNotification(
             packageName = sbn.packageName,
             uuid = Uuid.random(),
