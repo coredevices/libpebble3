@@ -6,7 +6,6 @@ import io.rebble.cobble.shared.data.js.fromWatchInfo
 import io.rebble.libpebblecommon.services.appmessage.AppMessageResult
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.filter
@@ -23,7 +22,7 @@ import kotlin.uuid.Uuid
 
 abstract class PrivatePKJSInterface(
     protected val jsRunner: JsRunner,
-    private val device: PebbleJSDevice,
+    private val device: CompanionAppDevice,
     protected val scope: CoroutineScope,
     private val outgoingAppMessages: MutableSharedFlow<AppMessageRequest>,
     private val logMessages: MutableSharedFlow<String>,
