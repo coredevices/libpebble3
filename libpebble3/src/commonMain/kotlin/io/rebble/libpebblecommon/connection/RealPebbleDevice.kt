@@ -249,6 +249,7 @@ internal class RealConnectedPebbleDevice(
     ConnectedPebble.CoreDump by services.coreDump,
     ConnectedPebble.Music by services.music,
     ConnectedPebble.PKJS by services.pkjs,
+    ConnectedPebble.CompanionAppControl by services.companionAppControl,
     ConnectedPebble.DevConnection by services.devConnection,
     ConnectedPebble.Screenshot by services.screenshot,
     ConnectedPebble.Language by services.language {

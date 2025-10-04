@@ -4,7 +4,7 @@ import io.rebble.libpebblecommon.connection.ConnectedPebble
 import io.rebble.libpebblecommon.connection.PebbleIdentifier
 import io.rebble.libpebblecommon.services.WatchInfo
 
-class PebbleJSDevice(
+class CompanionAppDevice(
     val identifier: PebbleIdentifier,
     val watchInfo: WatchInfo,
     appMessages: ConnectedPebble.AppMessages,

@@ -8,7 +8,7 @@ import io.rebble.libpebblecommon.connection.LibPebble
 
 class WebViewPKJSInterface(
     jsRunner: JsRunner,
-    device: PebbleJSDevice,
+    device: CompanionAppDevice,
     private val context: Context,
     libPebble: LibPebble,
     jsTokenUtil: JsTokenUtil,

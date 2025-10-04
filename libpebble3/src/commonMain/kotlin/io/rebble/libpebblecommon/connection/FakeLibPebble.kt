@@ -450,7 +450,9 @@ class FakeConnectedDevice(
 
     override val musicActions: Flow<MusicAction> = MutableSharedFlow()
     override val updateRequestTrigger: Flow<Unit> = MutableSharedFlow()
+    @Deprecated("Use more generic currentCompanionAppSession instead and cast if necessary")
     override val currentPKJSSession: StateFlow<PKJSApp?> = MutableStateFlow(null)
+    override val currentCompanionAppSession: StateFlow<CompanionApp?> = MutableStateFlow(null)
 
     override suspend fun startDevConnection() {}
     override suspend fun stopDevConnection() {}
