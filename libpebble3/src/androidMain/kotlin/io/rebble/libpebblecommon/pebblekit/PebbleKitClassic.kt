@@ -72,7 +72,9 @@ class PebbleKitClassic(
                 putExtra(MSG_DATA, pebbleDictionary.toJsonString())
             }
 
-            context.sendBroadcast(intent)
+            // Regular broadcasts are sometimes delayed on Android 14+. Use ordered ones instead.
+            // https://stackoverflow.com/questions/77842817/slow-intent-broadcast-delivery-on-android-14
+            context.sendOrderedBroadcast(intent, null)
         }.catch {
             logger.e(it) { "Error receiving app message: ${it.message}" }
         }.launchIn(scope)
@@ -118,7 +120,9 @@ class PebbleKitClassic(
                     putExtra(TRANSACTION_ID, result.transactionId.toInt())
                 }
 
-                context.sendBroadcast(intent)
+                // Regular broadcasts are sometimes delayed on Android 14+. Use ordered ones instead.
+                // https://stackoverflow.com/questions/77842817/slow-intent-broadcast-delivery-on-android-14
+                context.sendOrderedBroadcast(intent, null)
             }
         }
     }
@@ -197,7 +201,6 @@ private const val INTENT_APP_NACK = "com.getpebble.action.app.NACK"
  * Intent broadcast from pebble.apk containing one-or-more key-value pairs sent from the watch to the phone.
  */
 private const val INTENT_APP_RECEIVE = "com.getpebble.action.app.RECEIVE"
-
 
 /**
  * Intent broadcast from pebble.apk indicating that a sent message was successfully received by a watch app.
