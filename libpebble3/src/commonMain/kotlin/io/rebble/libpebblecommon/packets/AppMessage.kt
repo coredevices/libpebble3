@@ -75,7 +75,7 @@ class AppMessageTuple() : StructMappable() {
             }.valueNumber
         }
 
-    val dataAsUnsignedNumber: Long
+    val dataAsUnsignedNumber: ULong
         get() {
             val obj = when (val size = dataLength.get().toInt()) {
                 1 -> SUByte(StructMapper())
@@ -85,7 +85,7 @@ class AppMessageTuple() : StructMappable() {
             }
             return obj.apply {
                 fromBytes(DataBuffer(data.get()))
-            }.valueNumber
+            }.valueNumber.toULong()
         }
 
     override fun toString(): String {
