@@ -5,7 +5,6 @@ import android.app.NotificationChannelGroup
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import android.os.IBinder
 import android.os.Process
 import android.os.UserHandle
@@ -156,7 +155,13 @@ class LibPebbleNotificationListener : NotificationListenerService(), LibPebbleKo
     // Note (see above comments), if onListenerConnected was called twice, then so will this be, for
     // *every* notification. So - the handler must be resilient to this.
     override fun onNotificationPosted(sbn: StatusBarNotification) {
+        if (!configHolder.value.sendNotifications) {
+            logger.v { "Notification from ${sbn.packageName} filtered - sendNotifications is off" }
+            return
+        }
+
         if (configHolder.value.respectDoNotDisturb && isNotificationFilteredByDoNotDisturb(sbn)) {
+            logger.v { "Notification from ${sbn.packageName} filtered - do not disturb" }
             return
         }
 

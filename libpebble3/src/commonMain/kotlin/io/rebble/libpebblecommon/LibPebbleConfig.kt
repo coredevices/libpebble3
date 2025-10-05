@@ -110,6 +110,10 @@ data class NotificationConfig(
      * Default new apps to be enabled (else they will be disabled).
      */
     val defaultAppsToEnabled: Boolean = true,
+    /**
+     * When [false], no notifications will be sent at all
+     */
+    val sendNotifications: Boolean = true,
 )
 
 class NotificationConfigFlow(val flow: StateFlow<LibPebbleConfig>) {
