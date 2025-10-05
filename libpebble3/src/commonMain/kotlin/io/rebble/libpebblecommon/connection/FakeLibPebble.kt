@@ -47,10 +47,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
-import kotlin.time.Instant
 import kotlinx.io.files.Path
 import kotlin.random.Random
 import kotlin.time.Duration
+import kotlin.time.Instant
 import kotlin.uuid.Uuid
 
 class FakeLibPebble : LibPebble {
@@ -87,6 +87,10 @@ class FakeLibPebble : LibPebble {
     }
 
     override suspend fun launchApp(uuid: Uuid) {
+        // No-op
+    }
+
+    override suspend fun stopApp(uuid: Uuid) {
         // No-op
     }
 
@@ -379,6 +383,8 @@ class FakeConnectedDevice(
     override fun checkforFirmwareUpdate() {}
 
     override suspend fun launchApp(uuid: Uuid) {}
+
+    override suspend fun stopApp(uuid: Uuid) {}
 
     override val runningApp: StateFlow<Uuid?> = MutableStateFlow(null)
     override val watchInfo: WatchInfo = WatchInfo(
