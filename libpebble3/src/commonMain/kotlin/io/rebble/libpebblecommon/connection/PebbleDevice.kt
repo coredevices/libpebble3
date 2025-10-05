@@ -172,6 +172,7 @@ object ConnectedPebble {
 
     interface AppRunState {
         suspend fun launchApp(uuid: Uuid)
+        suspend fun stopApp(uuid: Uuid)
         val runningApp: StateFlow<Uuid?>
     }
 

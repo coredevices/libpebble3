@@ -91,6 +91,10 @@ class FakeLibPebble : LibPebble {
         // No-op
     }
 
+    override suspend fun stopApp(uuid: Uuid) {
+        // No-op
+    }
+
     override fun doStuffAfterPermissionsGranted() {
         // No-op
     }
@@ -384,6 +388,8 @@ class FakeConnectedDevice(
     override fun checkforFirmwareUpdate() {}
 
     override suspend fun launchApp(uuid: Uuid) {}
+
+    override suspend fun stopApp(uuid: Uuid) {}
 
     override val runningApp: StateFlow<Uuid?> = MutableStateFlow(null)
     override val watchInfo: WatchInfo = WatchInfo(
