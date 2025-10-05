@@ -11,11 +11,9 @@ import io.rebble.libpebblecommon.services.ProtocolService
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.shareIn
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlin.uuid.Uuid
 
 class AppMessageService(
@@ -23,7 +21,7 @@ class AppMessageService(
     private val scope: ConnectionCoroutineScope
 ) : ProtocolService, ConnectedPebble.AppMessages {
     private val receivedMessages = Channel<AppMessageData>(Channel.BUFFERED)
-    override val inboundAppMessages: Flow<AppMessageData> = receivedMessages.consumeAsFlow().shareIn(scope, started = SharingStarted.Lazily)
+    override val inboundAppMessages: Flow<AppMessageData> = receivedMessages.receiveAsFlow()
     override val transactionSequence: Iterator<UByte> = AppMessageTransactionSequence().iterator()
     private var appMessageCallback: CompletableDeferred<AppMessage>? = null
 
