@@ -8,10 +8,11 @@ import io.rebble.libpebblecommon.database.dao.LockerEntryRealDao
 import io.rebble.libpebblecommon.database.entity.LockerEntry
 import io.rebble.libpebblecommon.di.ConnectionCoroutineScope
 import io.rebble.libpebblecommon.disk.pbw.PbwApp
-import io.rebble.libpebblecommon.js.PKJSApp
 import io.rebble.libpebblecommon.js.CompanionAppDevice
+import io.rebble.libpebblecommon.js.PKJSApp
 import io.rebble.libpebblecommon.locker.Locker
 import io.rebble.libpebblecommon.locker.LockerPBWCache
+import io.rebble.libpebblecommon.metadata.pbw.appinfo.PbwAppInfo
 import io.rebble.libpebblecommon.services.WatchInfo
 import io.rebble.libpebblecommon.services.app.AppRunStateService
 import io.rebble.libpebblecommon.services.appmessage.AppMessageService
@@ -86,8 +87,8 @@ class CompanionAppLifecycleManager(
                 )
             }
             else -> {
-                logger.v { "App ${lockerEntry.id} does not have any companion app" }
-                null
+                logger.v { "App ${lockerEntry.id} does not have a PKJS, falling back to platform based PebbleKit" }
+                createPlatformSpecificCompanionAppControl(device, pbw.info)
             }
         }
     }
@@ -127,3 +128,5 @@ class PKJSStateFlow(private val runningAppStateFlow: StateFlow<CompanionApp?>): 
         throw IllegalStateException("This collect should never stop because parent is a state flow")
     }
 }
+
+expect fun createPlatformSpecificCompanionAppControl(device: CompanionAppDevice, appInfo: PbwAppInfo): CompanionApp?
