@@ -33,8 +33,9 @@ abstract class DevConnectionTransport(private val libPebble: LibPebble) {
     abstract fun stop()
 
     protected suspend fun installPBW(payload: ByteArray): Boolean {
-        val path = getTempPbwPath()
         try {
+            val path = getTempPbwPath()
+
             withContext(Dispatchers.IO) {
                 SystemFileSystem.sink(path).buffered().use {
                     it.writeFully(payload)
