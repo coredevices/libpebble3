@@ -11,9 +11,6 @@ import io.rebble.libpebblecommon.connection.LibPebble
 import io.rebble.libpebblecommon.connection.Watches
 import io.rebble.libpebblecommon.di.LibPebbleCoroutineScope
 import io.rebble.libpebblecommon.di.LibPebbleKoinComponent
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
 
 class PebbleKitProvider : ContentProvider(), LibPebbleKoinComponent {
     private var initialized = false
@@ -26,28 +23,17 @@ class PebbleKitProvider : ContentProvider(), LibPebbleKoinComponent {
         return true
     }
 
-    private fun initializeIfNeeded() {
+    private fun initializeIfNeeded(): Boolean {
         if (initialized) {
-            return
+            return true
         }
 
-        val context = context
-            ?: throw IllegalStateException("Context should not be null when initializing")
-
-        watches = getKoin().get<LibPebble>()
+        watches = getKoin().getOrNull<LibPebble>() ?: return false
         libPebbleCoroutineScope = getKoin().get()
 
         initialized = true
 
-        libPebbleCoroutineScope.launch {
-            watches.watches.map {
-                it.any { it is ConnectedPebbleDevice }
-            }
-                .distinctUntilChanged()
-                .collect {
-                    context.contentResolver.notifyChange(URI_CONTENT_BASALT, null)
-                }
-        }
+        return true
     }
 
     override fun query(
@@ -61,37 +47,56 @@ class PebbleKitProvider : ContentProvider(), LibPebbleKoinComponent {
             return null
         }
 
-        initializeIfNeeded()
-
         val cursor = MatrixCursor(CURSOR_COLUMN_NAMES)
 
-        val connectedWatch = watches.watches.value.filterIsInstance<ConnectedPebbleDevice>().firstOrNull()
+        cursor.use { _ ->
+            val appInitialized = initializeIfNeeded()
+            if (!appInitialized) {
+                // App is not initialized yet. Return disconnected for now, we will update when the app will init.
 
-        if (connectedWatch != null) {
-            val fwVersion = connectedWatch.watchInfo.runningFwVersion
-            cursor.addRow(
-                listOf(
-                    1, // Connected
-                    1, // App Message support
-                    0, // Data Logging support
-                    fwVersion.major, // Major version support
-                    fwVersion.minor, // Minor version support
-                    fwVersion.patch, // Point version support
-                    fwVersion.suffix, // Version Tag
+                cursor.addRow(
+                    listOf(
+                        0, // Connected
+                        0, // App Message support
+                        0, // Data Logging support
+                        0, // Major version support
+                        0, // Minor version support
+                        0, // Point version support
+                        "", // Version Tag
+                    )
                 )
-            )
-        } else {
-            cursor.addRow(
-                listOf(
-                    0, // Connected
-                    0, // App Message support
-                    0, // Data Logging support
-                    0, // Major version support
-                    0, // Minor version support
-                    0, // Point version support
-                    "", // Version Tag
+
+                return@use
+            }
+
+            val connectedWatch = watches.watches.value.filterIsInstance<ConnectedPebbleDevice>().firstOrNull()
+
+            if (connectedWatch != null) {
+                val fwVersion = connectedWatch.watchInfo.runningFwVersion
+                cursor.addRow(
+                    listOf(
+                        1, // Connected
+                        1, // App Message support
+                        0, // Data Logging support
+                        fwVersion.major, // Major version support
+                        fwVersion.minor, // Minor version support
+                        fwVersion.patch, // Point version support
+                        fwVersion.suffix, // Version Tag
+                    )
                 )
-            )
+            } else {
+                cursor.addRow(
+                    listOf(
+                        0, // Connected
+                        0, // App Message support
+                        0, // Data Logging support
+                        0, // Major version support
+                        0, // Minor version support
+                        0, // Point version support
+                        "", // Version Tag
+                    )
+                )
+            }
         }
 
         return cursor
@@ -115,6 +120,10 @@ class PebbleKitProvider : ContentProvider(), LibPebbleKoinComponent {
         // This provider is read-only
         return 0
     }
+
+    companion object {
+        internal val URI_CONTENT_BASALT = "content://com.getpebble.android.provider.basalt/state".toUri()
+    }
 }
 
 private val CURSOR_COLUMN_NAMES = arrayOf(
@@ -127,8 +136,6 @@ private val CURSOR_COLUMN_NAMES = arrayOf(
     KIT_STATE_COLUMN_VERSION_TAG.toString()
 )
 
-
-private val URI_CONTENT_BASALT = "content://com.getpebble.android.provider.basalt/state".toUri()
 
 private const val KIT_STATE_COLUMN_CONNECTED = 0
 
