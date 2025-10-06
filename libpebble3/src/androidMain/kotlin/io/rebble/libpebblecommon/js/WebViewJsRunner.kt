@@ -44,7 +44,7 @@ class WebViewJsRunner(
     libPebble: LibPebble,
     jsTokenUtil: JsTokenUtil,
 
-    device: PebbleJSDevice,
+    device: CompanionAppDevice,
     private val scope: CoroutineScope,
     appInfo: PbwAppInfo,
     lockerEntry: LockerEntry,

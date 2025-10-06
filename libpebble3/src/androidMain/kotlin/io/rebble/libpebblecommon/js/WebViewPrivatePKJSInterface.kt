@@ -10,7 +10,7 @@ import kotlinx.serialization.json.Json
 
 class WebViewPrivatePKJSInterface(
     jsRunner: WebViewJsRunner,
-    device: PebbleJSDevice,
+    device: CompanionAppDevice,
     scope: CoroutineScope,
     outgoingAppMessages: MutableSharedFlow<AppMessageRequest>,
     logMessages: MutableSharedFlow<String>

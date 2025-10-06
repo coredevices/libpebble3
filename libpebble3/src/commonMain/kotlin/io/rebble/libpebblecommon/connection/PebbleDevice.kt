@@ -107,6 +107,7 @@ sealed interface ConnectedPebbleDevice :
     ConnectedPebble.AppMessages,
     ConnectedPebble.Music,
     ConnectedPebble.PKJS,
+    ConnectedPebble.CompanionAppControl,
     ConnectedPebble.Screenshot,
     ConnectedPebble.Language
 
@@ -170,11 +171,17 @@ object ConnectedPebble {
 
     interface AppRunState {
         suspend fun launchApp(uuid: Uuid)
+        suspend fun stopApp(uuid: Uuid)
         val runningApp: StateFlow<Uuid?>
     }
 
     interface PKJS {
+        @Deprecated("Use more generic currentCompanionAppSession instead and cast if necessary")
         val currentPKJSSession: StateFlow<PKJSApp?>
+    }
+
+    interface CompanionAppControl {
+        val currentCompanionAppSession: StateFlow<CompanionApp?>
     }
 
     interface Time {
@@ -215,6 +222,7 @@ object ConnectedPebble {
         val coreDump: CoreDump,
         val music: Music,
         val pkjs: PKJS,
+        val companionAppControl: CompanionAppControl,
         val devConnection: DevConnection,
         val screenshot: Screenshot,
         val language: Language,

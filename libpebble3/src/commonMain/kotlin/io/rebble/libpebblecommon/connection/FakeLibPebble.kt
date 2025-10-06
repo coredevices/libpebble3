@@ -47,10 +47,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
-import kotlin.time.Instant
 import kotlinx.io.files.Path
 import kotlin.random.Random
 import kotlin.time.Duration
+import kotlin.time.Instant
 import kotlin.uuid.Uuid
 
 class FakeLibPebble : LibPebble {
@@ -87,6 +87,10 @@ class FakeLibPebble : LibPebble {
     }
 
     override suspend fun launchApp(uuid: Uuid) {
+        // No-op
+    }
+
+    override suspend fun stopApp(uuid: Uuid) {
         // No-op
     }
 
@@ -380,6 +384,8 @@ class FakeConnectedDevice(
 
     override suspend fun launchApp(uuid: Uuid) {}
 
+    override suspend fun stopApp(uuid: Uuid) {}
+
     override val runningApp: StateFlow<Uuid?> = MutableStateFlow(null)
     override val watchInfo: WatchInfo = WatchInfo(
         runningFwVersion = FirmwareVersion.from(
@@ -445,7 +451,9 @@ class FakeConnectedDevice(
 
     override val musicActions: Flow<MusicAction> = MutableSharedFlow()
     override val updateRequestTrigger: Flow<Unit> = MutableSharedFlow()
+    @Deprecated("Use more generic currentCompanionAppSession instead and cast if necessary")
     override val currentPKJSSession: StateFlow<PKJSApp?> = MutableStateFlow(null)
+    override val currentCompanionAppSession: StateFlow<CompanionApp?> = MutableStateFlow(null)
 
     override suspend fun startDevConnection() {}
     override suspend fun stopDevConnection() {}
