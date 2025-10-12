@@ -427,7 +427,10 @@ class FakeConnectedDevice(
 
     override suspend fun updateTime() {}
 
-    override val inboundAppMessages: Flow<AppMessageData> = MutableSharedFlow()
+    override fun inboundAppMessages(appUuid: Uuid): Flow<AppMessageData> {
+        return MutableSharedFlow()
+    }
+
     override val transactionSequence: Iterator<UByte> = iterator { }
 
     override suspend fun sendAppMessage(appMessageData: AppMessageData): AppMessageResult =
