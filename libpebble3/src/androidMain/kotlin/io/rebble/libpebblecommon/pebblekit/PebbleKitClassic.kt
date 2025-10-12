@@ -56,13 +56,8 @@ class PebbleKitClassic(
     }
 
     private fun launchIncomingAppMessageHandler(device: ConnectedPebble.AppMessages, scope: CoroutineScope) {
-        device.inboundAppMessages.onEach { appMessageData ->
+        device.inboundAppMessages(uuid).onEach { appMessageData ->
             logger.d { "Got inbound message" }
-            if (appMessageData.uuid != uuid) {
-                logger.v { "App message for different app: ${appMessageData.uuid} != $uuid, sending NACK" }
-                replyNACK(appMessageData.transactionId)
-                return@onEach
-            }
 
             val pebbleDictionary = appMessageData.data.toPebbleDictionary()
             val intent = Intent(INTENT_APP_RECEIVE).apply {

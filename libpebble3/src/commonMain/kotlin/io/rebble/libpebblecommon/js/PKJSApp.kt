@@ -82,12 +82,7 @@ class PKJSApp(
     }
 
     private fun launchIncomingAppMessageHandler(device: ConnectedPebble.AppMessages, scope: CoroutineScope) {
-        device.inboundAppMessages.onEach { appMessageData ->
-            if (appMessageData.uuid != uuid) {
-                logger.v { "App message for different app: ${appMessageData.uuid} != $uuid, sending NACK" }
-                replyNACK(appMessageData.transactionId)
-                return@onEach
-            }
+        device.inboundAppMessages(uuid).onEach { appMessageData ->
             jsRunner?.let { runner ->
                 if (!runner.readyState.value) {
                     logger.w { "JsRunner not ready, waiting" }
