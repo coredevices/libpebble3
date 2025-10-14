@@ -16,18 +16,20 @@ class JSCJSLocalStorageInterface(
     appContext: AppContext,
     private val evalRaw: (String) -> JSValue?
 ): JSLocalStorageInterface(scopedSettingsUuid, appContext), RegisterableJsInterface {
+    override val interf = mapOf(
+        "getItem" to this::getItem,
+        "setItem" to this::setItem,
+        "removeItem" to this::removeItem,
+        "clear" to this::clear,
+        "key" to this::key
+    )
+    override val name = "localStorage"
     private lateinit var localStorage: JSManagedValue
-    override fun register(jsContext: JSContext) {
-        jsContext["localStorage"] = mapOf(
-            "getItem" to this::getItem,
-            "setItem" to this::setItem,
-            "removeItem" to this::removeItem,
-            "clear" to this::clear,
-            "key" to this::key
-        )
+    override fun onRegister(jsContext: JSContext) {
         localStorage = JSManagedValue(jsContext["localStorage"]!!)
         jsContext.virtualMachine!!.addManagedReference(localStorage, this)
         setLength(getLength())
+        localStorage.value?.set("__override__", true)
     }
 
     override fun getItem(key: Any?): Any? {

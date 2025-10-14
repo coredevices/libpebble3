@@ -17,14 +17,13 @@ class JSTimeout(private val scope: CoroutineScope, private val evalRaw: (String)
     private var timeoutIDs = (1..Int.MAX_VALUE).iterator()
     private val jsFunTriggerTimeout: JSManagedValue get() = JSManagedValue(evalRaw("globalThis._LibPebbleTriggerTimeout")!!)
     private val jsFunTriggerInterval: JSManagedValue get() = JSManagedValue(evalRaw("globalThis._LibPebbleTriggerInterval")!!)
-    override fun register(jsContext: JSContext) {
-        jsContext["_Timeout"] = mapOf(
-            "setTimeout" to this::setTimeout,
-            "setInterval" to this::setInterval,
-            "clearTimeout" to this::clearTimeout,
-            "clearInterval" to this::clearInterval
-        )
-    }
+    override val interf = mapOf(
+        "setTimeout" to this::setTimeout,
+        "setInterval" to this::setInterval,
+        "clearTimeout" to this::clearTimeout,
+        "clearInterval" to this::clearInterval
+    )
+    override val name = "_Timeout"
 
     private fun triggerTimeout(id: Int) {
         jsFunTriggerTimeout.value?.callWithArguments(listOf(id.toDouble()))

@@ -11,15 +11,14 @@ class JSCGeolocationInterface(
     scope: CoroutineScope,
     jsRunner: JsRunner
 ): GeolocationInterface(scope, jsRunner), RegisterableJsInterface {
-    override fun register(jsContext: JSContext) {
-        jsContext["_PebbleGeo"] = mapOf(
-            "getCurrentPosition" to this::getCurrentPosition,
-            "watchPosition" to this::watchPosition,
-            "clearWatch" to this::clearWatch,
-            "getRequestCallbackID" to this::getRequestCallbackID,
-            "getWatchCallbackID" to this::getWatchCallbackID
-        )
-    }
+    override val interf = mapOf(
+        "getCurrentPosition" to this::getCurrentPosition,
+        "watchPosition" to this::watchPosition,
+        "clearWatch" to this::clearWatch,
+        "getRequestCallbackID" to this::getRequestCallbackID,
+        "getWatchCallbackID" to this::getWatchCallbackID
+    )
+    override val name = "_PebbleGeo"
 
     override fun close() {
 

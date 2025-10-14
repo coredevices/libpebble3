@@ -1,3 +1,4 @@
+import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSetTree
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask
 
 plugins {
@@ -36,6 +37,7 @@ android {
     defaultConfig {
         minSdk = 26
         lint.targetSdk = compileSdk
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     compileOptions {
@@ -75,6 +77,9 @@ kotlin {
 
     androidTarget {
         publishLibraryVariants("release", "debug")
+        instrumentedTestVariant {
+            sourceSetTree.set(KotlinSourceSetTree.test)
+        }
     }
 
     jvm()
@@ -101,7 +106,13 @@ kotlin {
            iosArm64(),
            iosSimulatorArm64()
        ).forEach { target ->
-           val dir = tasks.getByName("buildFrameworkLibPebbleSwift").outputs.files.singleFile
+           val osName = when (target.name) {
+               "iosX64" -> "iphonesimulator"
+               "iosArm64" -> "iphoneos"
+               "iosSimulatorArm64" -> "iphonesimulator"
+               else -> throw IllegalStateException("Unknown target: ${target.name}")
+           }
+           val dir = tasks.getByName("buildFrameworkLibPebbleSwift").outputs.files.singleFile.resolve(osName)
            target.binaries.framework {
                baseName = "libpebble3"
            }
@@ -113,12 +124,6 @@ kotlin {
            target.binaries.all {
                linkerOpts("-framework", "LibPebbleSwift", "-F" + dir.absolutePath)
                if (xcodeExists) {
-                   val osName = when (target.name) {
-                       "iosX64" -> "iphonesimulator"
-                       "iosArm64" -> "iphoneos"
-                       "iosSimulatorArm64" -> "iphonesimulator"
-                       else -> throw IllegalStateException("Unknown target: ${target.name}")
-                   }
                    linkerOpts("-L$xcodeDir/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/$osName")
                }
            }
@@ -192,6 +197,12 @@ kotlin {
             implementation(libs.ktor.websockets)
             implementation(libs.ktor.cio)
             implementation(libs.ktor.client.okhttp)
+        }
+
+        androidInstrumentedTest.dependencies {
+            implementation(libs.androidx.test.runner)
+            implementation(libs.androidx.test.rules)
+            implementation(libs.androidx.monitor)
         }
     }
 }
@@ -349,17 +360,22 @@ abstract class BuildSwiftFramework: DefaultTask() {
                 "-scheme", "LibPebbleSwift",
                 "-configuration", "Release",
                 "-sdk", "iphoneos",
-                "CONFIGURATION_BUILD_DIR=${outputDir.get().asFile.absolutePath}",
+                "CONFIGURATION_BUILD_DIR=${outputDir.get().asFile.resolve("iphoneos/").absolutePath}",
                 "ARCHS=arm64",
                 "SUPPORTS_MACCATALYST=NO",
             )
-//            commandLine(
-//                "xcodebuild", "-project", "LibPebbleSwift.xcodeproj",
-//                "-scheme", "LibPebbleSwift",
-//                "-configuration", "Release",
-//                "-sdk", "iphonesimulator",
-//                "CONFIGURATION_BUILD_DIR=${outputDir.get().asFile.absolutePath}",
-//            )
+            workingDir = project.file("libpebble-swift")
+            standardOutput = System.out
+            errorOutput = System.err
+        }
+        getExecOperations().exec {
+            commandLine(
+                "xcodebuild", "-project", "LibPebbleSwift.xcodeproj",
+                "-scheme", "LibPebbleSwift",
+                "-configuration", "Release",
+                "-sdk", "iphonesimulator",
+                "CONFIGURATION_BUILD_DIR=${outputDir.get().asFile.resolve("iphonesimulator/").absolutePath}",
+            )
             workingDir = project.file("libpebble-swift")
             standardOutput = System.out
             errorOutput = System.err

@@ -7,6 +7,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
+import androidx.core.net.toUri
 
 class WebViewPrivatePKJSInterface(
     jsRunner: WebViewJsRunner,
@@ -27,7 +28,7 @@ class WebViewPrivatePKJSInterface(
             logger.e { "Startup script has loaded, but data is null" }
             return
         }
-        val uri = Uri.parse(data)
+        val uri = data.toUri()
         val params = uri.getQueryParameter("params")
         val paramsDecoded = Uri.decode(params)
         val paramsJson = Json.decodeFromString<Map<String, String>>(paramsDecoded)

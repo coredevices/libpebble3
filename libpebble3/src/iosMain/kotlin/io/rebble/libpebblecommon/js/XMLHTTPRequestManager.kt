@@ -13,6 +13,7 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpMethod
 import io.ktor.util.encodeBase64
 import io.ktor.util.flattenEntries
+import io.ktor.utils.io.charsets.MalformedInputException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -24,7 +25,6 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import platform.Foundation.NSNull
-import platform.JavaScriptCore.JSContext
 import platform.JavaScriptCore.JSValue
 
 private const val UNSENT = 0
@@ -38,16 +38,15 @@ class XMLHTTPRequestManager(private val scope: CoroutineScope, private val eval:
     private val instances = mutableMapOf<Int, XHRInstance>()
     private val client = HttpClient(Darwin)
     private val logger = Logger.withTag("XMLHTTPRequestManager")
+    override val interf = mapOf(
+        "getXHRInstanceID" to this::getXHRInstanceID,
+        "open" to this::open,
+        "setRequestHeader" to this::setRequestHeader,
+        "send" to this::send,
+        "abort" to this::abort,
+    )
 
-    override fun register(jsContext: JSContext) {
-        jsContext["_XMLHTTPRequestManager"] = mapOf(
-            "getXHRInstanceID" to this::getXHRInstanceID,
-            "open" to this::open,
-            "setRequestHeader" to this::setRequestHeader,
-            "send" to this::send,
-            "abort" to this::abort,
-        )
-    }
+    override val name = "_XMLHTTPRequestManager"
 
     private fun getXHRInstanceID(): Int {
         val id = ++lastInstance
@@ -173,7 +172,16 @@ class XMLHTTPRequestManager(private val scope: CoroutineScope, private val eval:
                 val body = try {
                     when (responseType) {
                         "arraybuffer" -> Json.encodeToString(response.bodyAsBytes().encodeBase64())
-                        "text", "", "json", null -> Json.encodeToString(response.bodyAsText())
+                        "text", "", "json", null -> {
+                            val text = try {
+                                response.bodyAsText()
+                            } catch (e: MalformedInputException) {
+                                logger.e(e) { "Response has charset errors: ${e.message}. Decoding as UTF-8 with replacements" }
+                                // Replace invalid sequences
+                                response.bodyAsBytes().decodeToString(throwOnInvalidSequence = false)
+                            }
+                            Json.encodeToString(text)
+                        }
                         else -> {
                             logger.e { "Invalid response type: $responseType" }
                             "null"

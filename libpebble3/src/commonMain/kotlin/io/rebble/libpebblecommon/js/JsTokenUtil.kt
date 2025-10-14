@@ -3,14 +3,14 @@ package io.rebble.libpebblecommon.js
 import io.ktor.utils.io.core.toByteArray
 import io.rebble.libpebblecommon.connection.PKJSToken
 import io.rebble.libpebblecommon.connection.TokenProvider
-import io.rebble.libpebblecommon.database.dao.LockerEntryRealDao
+import io.rebble.libpebblecommon.database.entity.LockerEntryDao
 import io.rebble.libpebblecommon.services.WatchInfo
 import okio.Buffer
 import kotlin.uuid.Uuid
 
 class JsTokenUtil(
     private val tokenProvider: TokenProvider,
-    private val lockerEntryRealDao: LockerEntryRealDao,
+    private val lockerEntryDao: LockerEntryDao,
 ): PKJSToken {
     companion object {
         private const val ACCOUNT_TOKEN_SALT =
@@ -39,7 +39,7 @@ class JsTokenUtil(
 
     override suspend fun getAccountToken(appUuid: Uuid): String? {
         val devToken = tokenProvider.getDevToken() ?: return null
-        val devId = lockerEntryRealDao.getEntry(appUuid)?.appstoreData?.developerId
+        val devId = lockerEntryDao.getEntry(appUuid)?.appstoreData?.developerId
         return generateToken(appUuid, devId ?: appUuid.toString().uppercase(), devToken)
     }
 

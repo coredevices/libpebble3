@@ -87,6 +87,12 @@ import io.rebble.libpebblecommon.contacts.PhoneContactsSyncer
 import io.rebble.libpebblecommon.database.BlobDbDatabaseManager
 import io.rebble.libpebblecommon.database.Database
 import io.rebble.libpebblecommon.database.RealBlobDbDatabaseManager
+import io.rebble.libpebblecommon.database.dao.LockerEntryRealDao
+import io.rebble.libpebblecommon.database.dao.NotificationAppRealDao
+import io.rebble.libpebblecommon.database.dao.TimelineNotificationRealDao
+import io.rebble.libpebblecommon.database.entity.LockerEntryDao
+import io.rebble.libpebblecommon.database.entity.NotificationAppItemDao
+import io.rebble.libpebblecommon.database.entity.TimelineNotificationDao
 import io.rebble.libpebblecommon.database.getRoomDatabase
 import io.rebble.libpebblecommon.datalogging.Datalogging
 import io.rebble.libpebblecommon.health.Health
@@ -294,9 +300,9 @@ fun initKoin(
                 singleOf(::StaticLockerPBWCache) bind LockerPBWCache::class
                 singleOf(::PebbleDeviceFactory)
                 single { get<Database>().knownWatchDao() }
-                single { get<Database>().lockerEntryDao() }
-                single { get<Database>().notificationAppDao() }
-                single { get<Database>().timelineNotificationDao() }
+                single { get<Database>().lockerEntryDao() } binds arrayOf(LockerEntryDao::class, LockerEntryRealDao::class)
+                single { get<Database>().notificationAppDao() } binds arrayOf(NotificationAppItemDao::class, NotificationAppRealDao::class)
+                single { get<Database>().timelineNotificationDao() } binds arrayOf(TimelineNotificationDao::class, TimelineNotificationRealDao::class)
                 single { get<Database>().timelinePinDao() }
                 single { get<Database>().timelineReminderDao() }
                 single { get<Database>().calendarDao() }

@@ -209,10 +209,6 @@ navigator.geolocation.clearWatch = (id) => {
         }
     }
 
-    const signalLoaded = () => {
-        _Pebble.signalAppScriptLoadedByBootstrap();
-    }
-
     global.signalWebviewOpenedEvent = (data) => {
         dispatchPebbleEvent(PebbleEventTypes.WEBVIEW_OPENED, { opened: data });
     }
@@ -260,18 +256,6 @@ navigator.geolocation.clearWatch = (id) => {
         const payload = data ? JSON.parse(data) : {};
         dispatchPebbleEvent(PebbleEventTypes.GET_TIMELINE_TOKEN_FAILURE, { payload });
     };
-    global.loadScript = (url) => {
-        if (document) { // Only used on webviews
-            const head = document.getElementsByTagName("head")[0];
-            const script = document.createElement("script");
-            script.type = "text/javascript";
-            script.src = url;
-            script.onreadystatechange = signalLoaded;
-            script.onload = signalLoaded;
-    
-            head.appendChild(script);
-        }
-    }
 
     const PebbleAPI = {
         addEventListener: (type, callback, useCapture) => {

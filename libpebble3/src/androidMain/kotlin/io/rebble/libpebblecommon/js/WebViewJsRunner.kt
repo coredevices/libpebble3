@@ -34,9 +34,14 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import kotlinx.io.files.Path
 import kotlinx.serialization.json.Json
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
+import androidx.core.net.toUri
+import java.io.File
 
 
 class WebViewJsRunner(
@@ -277,23 +282,42 @@ class WebViewJsRunner(
         check(webView != null) { "WebView not initialized" }
         withContext(Dispatchers.Main) {
             webView?.loadUrl(
-                    Uri.parse(STARTUP_URL).buildUpon()
-                            .appendQueryParameter("params", "{\"loadUrl\": \"$url\"}")
-                            .build()
-                            .toString()
+                STARTUP_URL.toUri().buildUpon()
+                    .appendQueryParameter("params", "{\"loadUrl\": \"$url\"}")
+                    .build()
+                    .toString()
             )
         }
     }
 
     override suspend fun loadAppJs(jsUrl: String) {
         webView?.let { webView ->
-            if (jsUrl.isNullOrBlank() || !jsUrl.endsWith(".js")) {
+            shimLocalStorage()
+
+            if (jsUrl.isBlank() || !jsUrl.endsWith(".js")) {
                 logger.e { "loadUrl passed to loadAppJs empty or invalid" }
                 return
             }
 
+            val urlAsUri = Uri.fromFile(File(jsUrl)).toString()
+
             withContext(Dispatchers.Main) {
-                webView.loadUrl("javascript:loadScript('$jsUrl')")
+                webView.evaluateJavascript(
+                        """
+                            (() => {
+                                const signalLoaded = () => {
+                                    _Pebble.signalAppScriptLoadedByBootstrap();
+                                }
+                                const head = document.getElementsByTagName("head")[0];
+                                const script = document.createElement("script");
+                                script.type = "text/javascript";
+                                script.onreadystatechange = signalLoaded;
+                                script.onload = signalLoaded;
+                                script.src = ${Json.encodeToString(urlAsUri)};
+                                head.appendChild(script);
+                            })();
+                            """.trimIndent()
+                ) { value -> logger.d { "added app script tag" } }
             }
         } ?: error("WebView not initialized")
     }
@@ -301,23 +325,22 @@ class WebViewJsRunner(
     override suspend fun signalTimelineToken(callId: String, token: String) {
         val tokenJson = Json.encodeToString(mapOf("userToken" to token, "callId" to callId))
         withContext(Dispatchers.Main) {
-            webView?.loadUrl("javascript:signalTimelineTokenSuccess('${Uri.encode(tokenJson)}')")
+            webView?.evaluateJavascript("window.signalTimelineTokenSuccess('${Uri.encode(tokenJson)}')", null)
         }
     }
 
     override suspend fun signalTimelineTokenFail(callId: String) {
         val tokenJson = Json.encodeToString(mapOf("userToken" to null, "callId" to callId))
         withContext(Dispatchers.Main) {
-            webView?.loadUrl("javascript:signalTimelineTokenFailure('${Uri.encode(tokenJson)}')")
+            webView?.evaluateJavascript("window.signalTimelineTokenFailure('${Uri.encode(tokenJson)}')", null)
         }
     }
 
     override suspend fun signalReady() {
-        shimLocalStorage()
         val readyDeviceIds = listOf(device.identifier.asString)
         val readyJson = Json.encodeToString(readyDeviceIds)
         withContext(Dispatchers.Main) {
-            webView?.loadUrl("javascript:signalReady(${Uri.encode(readyJson)})")
+            webView?.evaluateJavascript("window.signalReady(${readyJson})", null)
         }
         _readyState.value = true
     }
@@ -325,21 +348,21 @@ class WebViewJsRunner(
     override suspend fun signalNewAppMessageData(data: String?): Boolean {
         readyState.first { it }
         withContext(Dispatchers.Main) {
-            webView?.loadUrl("javascript:signalNewAppMessageData(${Uri.encode("'" + (data ?: "null") + "'")})")
+            webView?.evaluateJavascript("window.signalNewAppMessageData(${"'" + (data ?: "null") + "'"})", null)
         }
         return true
     }
 
     override suspend fun signalAppMessageAck(data: String?): Boolean {
         withContext(Dispatchers.Main) {
-            webView?.loadUrl("javascript:signalAppMessageAck(${Uri.encode("'" + (data ?: "null") + "'")})")
+            webView?.evaluateJavascript("window.signalAppMessageAck(${"'" + (data ?: "null") + "'"})", null)
         }
         return true
     }
 
     override suspend fun signalAppMessageNack(data: String?): Boolean {
         withContext(Dispatchers.Main) {
-            webView?.loadUrl("javascript:signalAppMessageNack(${Uri.encode("'" + (data ?: "null") + "'")})")
+            webView?.evaluateJavascript("window.signalAppMessageNack(${"'" + (data ?: "null") + "'"})", null)
         }
         return true
     }
@@ -347,7 +370,7 @@ class WebViewJsRunner(
     override suspend fun signalShowConfiguration() {
         readyState.first { it }
         withContext(Dispatchers.Main) {
-            webView?.loadUrl("javascript:signalShowConfiguration()")
+            webView?.evaluateJavascript("window.signalShowConfiguration()", null)
         }
     }
 
@@ -361,6 +384,16 @@ class WebViewJsRunner(
         withContext(Dispatchers.Main) {
             webView?.evaluateJavascript(js, null) ?: run {
                 logger.e { "WebView not initialized, cannot evaluate JS" }
+            }
+        }
+    }
+
+    override suspend fun evalWithResult(js: String): Any? {
+        return withContext(Dispatchers.Main) {
+            return@withContext suspendCancellableCoroutine { cont ->
+                webView?.evaluateJavascript(js) { result ->
+                    cont.resume(result)
+                } ?: cont.resumeWithException(IllegalStateException("WebView not initialized"))
             }
         }
     }

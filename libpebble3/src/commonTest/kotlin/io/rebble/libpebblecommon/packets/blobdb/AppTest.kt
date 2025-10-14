@@ -6,7 +6,7 @@ import kotlin.test.Test
 
 internal class AppTest {
     @Test
-    fun `AppMetadata flags should be little endian`() {
+    fun appMetadataFlagsShouldBeLittleEndian() {
         val appMetadata = AppMetadata()
         appMetadata.flags.set(0x00FFu)
         val serialized = appMetadata.toBytes()

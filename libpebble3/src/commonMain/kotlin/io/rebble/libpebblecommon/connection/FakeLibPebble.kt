@@ -3,6 +3,7 @@ package io.rebble.libpebblecommon.connection
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.toArgb
+import io.ktor.util.PlatformUtils
 import io.rebble.libpebblecommon.LibPebbleConfig
 import io.rebble.libpebblecommon.calls.Call
 import io.rebble.libpebblecommon.connection.bt.BluetoothState
@@ -273,11 +274,14 @@ fun fakeWatches(): List<PebbleDevice> {
     }
 }
 
-fun fakeWatch(): PebbleDevice {
+fun fakeWatch(connected: Boolean = Random.nextBoolean()): PebbleDevice {
     val num = Random.nextInt(1111, 9999)
     val name = "Core $num"
-    val connected = Random.nextBoolean()
-    val fakeIdentifier = randomMacAddress().asPebbleBleIdentifier()
+    val fakeIdentifier = if (PlatformUtils.IS_JVM) {
+        randomMacAddress().asPebbleBleIdentifier()
+    } else {
+        Uuid.random().toString().asPebbleBleIdentifier()
+    }
     return if (connected) {
         val updating = Random.nextBoolean()
         val fwupState = if (updating) {

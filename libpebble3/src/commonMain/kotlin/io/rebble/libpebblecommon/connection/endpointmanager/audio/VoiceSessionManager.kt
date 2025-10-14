@@ -141,12 +141,21 @@ class VoiceSessionManager(
                 val result = try {
                     transcriptionProvider.transcribe(setupRequest.encoderInfo, audioFrameFlow)
                 } catch (e: CancellationException) {
+                    logger.d { "Voice session cancelled" }
                     throw e
                 } catch (e: Exception) {
                     logger.e(e) { "Error during transcription: ${e.message}" }
                     TranscriptionResult.Error("Transcription error: ${e.message}")
                 }
-                logger.i { "Voice session completed with result: ${result::class.simpleName}" }
+                logger.i { "Voice session completed with result: ${
+                    when (result) {
+                        is TranscriptionResult.Success -> "Success, ${result.words.size} words"
+                        is TranscriptionResult.Error -> "Error, ${result.message}"
+                        is TranscriptionResult.Disabled -> "Disabled"
+                        is TranscriptionResult.Failed -> "Failed"
+                        is TranscriptionResult.ConnectionError -> "ConnectionError"
+                    }
+                }" }
                 if (!audioFrameFlowCollected) {
                     logger.w { "Audio frames not collected, sending audio stop packet" }
                     audioStreamService.send(AudioStream.StopTransfer(setupRequest.sessionId.toUShort()))

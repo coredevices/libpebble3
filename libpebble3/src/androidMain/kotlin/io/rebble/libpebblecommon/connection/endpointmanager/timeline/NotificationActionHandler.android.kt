@@ -51,7 +51,7 @@ class AndroidNotificationActionHandler(
         val responseText = pebbleInvokeAttrs.firstOrNull {
             it.attributeId.get() == TimelineAttribute.Title.id
         }?.content?.get()?.asByteArray()?.decodeToString()
-            ?.take(TimelineAttribute.Title.maxLength - 1) ?: run {
+            ?.take(1024 - 1) ?: run {
             logger.e { "No response text found for action while handling: $notificationAction" }
             return null
         }
