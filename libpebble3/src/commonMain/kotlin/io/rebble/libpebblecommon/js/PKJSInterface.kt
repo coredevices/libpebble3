@@ -4,14 +4,13 @@ import io.rebble.libpebblecommon.connection.LibPebble
 import io.rebble.libpebblecommon.database.entity.buildTimelineNotification
 import io.rebble.libpebblecommon.packets.blobdb.TimelineItem
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
 import kotlinx.coroutines.runBlocking
 import kotlin.time.Clock
 import kotlin.uuid.Uuid
 
 abstract class PKJSInterface(
     protected val jsRunner: JsRunner,
-    protected val device: PebbleJSDevice,
+    protected val device: CompanionAppDevice,
     private val libPebble: LibPebble,
     private val jsTokenUtil: JsTokenUtil,
 ) {

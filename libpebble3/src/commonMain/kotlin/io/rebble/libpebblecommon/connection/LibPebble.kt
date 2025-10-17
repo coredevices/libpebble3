@@ -35,6 +35,7 @@ import io.rebble.libpebblecommon.locker.LockerWrapper
 import io.rebble.libpebblecommon.notification.NotificationApi
 import io.rebble.libpebblecommon.notification.NotificationListenerConnection
 import io.rebble.libpebblecommon.packets.ProtocolCapsFlag
+import io.rebble.libpebblecommon.performPlatformSpecificInit
 import io.rebble.libpebblecommon.services.FirmwareVersion
 import io.rebble.libpebblecommon.services.WatchInfo
 import io.rebble.libpebblecommon.time.TimeChanged
@@ -76,6 +77,7 @@ interface LibPebble : Scanning, RequestSync, LockerApi, NotificationApps, CallMa
     suspend fun markNotificationRead(itemId: Uuid)
     suspend fun sendPing(cookie: UInt)
     suspend fun launchApp(uuid: Uuid)
+    suspend fun stopApp(uuid: Uuid)
     // ....
 
     fun doStuffAfterPermissionsGranted()
@@ -257,6 +259,8 @@ class LibPebble3(
             libPebbleCoroutineScope.launch { forEachConnectedWatch { updateTime() } }
         }
         housekeeping.init()
+
+        performPlatformSpecificInit()
     }
 
     override val config: StateFlow<LibPebbleConfig> = libPebbleConfigFlow.config
@@ -284,6 +288,10 @@ class LibPebble3(
 
     override suspend fun launchApp(uuid: Uuid) {
         forEachConnectedWatch { launchApp(uuid) }
+    }
+
+    override suspend fun stopApp(uuid: Uuid) {
+        forEachConnectedWatch { stopApp(uuid) }
     }
 
     override fun doStuffAfterPermissionsGranted() {

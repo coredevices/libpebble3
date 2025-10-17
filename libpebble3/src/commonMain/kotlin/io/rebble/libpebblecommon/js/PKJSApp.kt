@@ -1,6 +1,7 @@
 package io.rebble.libpebblecommon.js
 
 import co.touchlab.kermit.Logger
+import io.rebble.libpebblecommon.connection.CompanionApp
 import io.rebble.libpebblecommon.connection.ConnectedPebble
 import io.rebble.libpebblecommon.database.entity.LockerEntry
 import io.rebble.libpebblecommon.di.LibPebbleKoinComponent
@@ -51,11 +52,11 @@ import kotlin.time.Duration.Companion.seconds
 import kotlin.uuid.Uuid
 
 class PKJSApp(
-    val device: PebbleJSDevice,
+    val device: CompanionAppDevice,
     private val jsPath: Path,
     val appInfo: PbwAppInfo,
     val lockerEntry: LockerEntry,
-): LibPebbleKoinComponent {
+): LibPebbleKoinComponent, CompanionApp {
     companion object {
         private val logger = Logger.withTag(PKJSApp::class.simpleName!!)
     }
@@ -81,12 +82,7 @@ class PKJSApp(
     }
 
     private fun launchIncomingAppMessageHandler(device: ConnectedPebble.AppMessages, scope: CoroutineScope) {
-        device.inboundAppMessages.onEach { appMessageData ->
-            if (appMessageData.uuid != uuid) {
-                logger.v { "App message for different app: ${appMessageData.uuid} != $uuid, sending NACK" }
-                replyNACK(appMessageData.transactionId)
-                return@onEach
-            }
+        device.inboundAppMessages(uuid).onEach { appMessageData ->
             jsRunner?.let { runner ->
                 if (!runner.readyState.value) {
                     logger.w { "JsRunner not ready, waiting" }
@@ -155,7 +151,7 @@ class PKJSApp(
             )
         }
 
-    suspend fun start(connectionScope: CoroutineScope) {
+    override suspend fun start(connectionScope: CoroutineScope) {
         val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
             logger.e(throwable) { "Unhandled exception in PKJSApp: ${throwable.message}" }
         }
@@ -167,7 +163,7 @@ class PKJSApp(
         jsRunner?.start() ?: error("JsRunner not initialized")
     }
 
-    suspend fun stop() {
+    override suspend fun stop() {
         jsRunner?.stop()
         runningScope?.cancel()
         jsRunner = null

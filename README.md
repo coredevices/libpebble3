@@ -8,6 +8,20 @@ See https://github.com/coredevices/libpebble3/wiki/Roadmap
 
 See https://github.com/coredevices/libpebble3/wiki/Roadmap
 
+## Enabling PebbleKit Android Classic
+
+To fully enable PebbleKit Android Classic, you have to add this provider to your `AndroidManifest.xml`:
+
+```xml
+<provider
+    android:authorities="com.getpebble.android.provider.basalt"
+    android:name="io.rebble.libpebblecommon.pebblekit.PebbleKitProvider"
+    tools:ignore="ExportedContentProvider"
+    android:exported="true" />
+```
+
+Note that by doing so, your app will not be able to be installed alongside other apps that also do this.
+
 # Contributing
 
 We aren't actively encouraging contributions yet, while we are aggressively building out feature parity with the original Pebble apps. CI testing is not comprehensive, so changes need to be manually tested with real hardware using CoreApp, and our roadmap/bug tracker is not currently on github. We will update when this changes.
