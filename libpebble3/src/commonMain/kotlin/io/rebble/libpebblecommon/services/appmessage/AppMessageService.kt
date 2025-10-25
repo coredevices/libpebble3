@@ -11,20 +11,24 @@ import io.rebble.libpebblecommon.services.ProtocolService
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.consumeAsFlow
+import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.flatMapConcat
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.shareIn
+import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlin.uuid.Uuid
+
+private const val APPMESSAGE_BUFFER_SIZE = 16
 
 class AppMessageService(
     private val protocolHandler: PebbleProtocolHandler,
     private val scope: ConnectionCoroutineScope
 ) : ProtocolService, ConnectedPebble.AppMessages {
-    private val receivedMessages = Channel<AppMessageData>(Channel.BUFFERED)
-    override val inboundAppMessages: Flow<AppMessageData> = receivedMessages.consumeAsFlow().shareIn(scope, started = SharingStarted.Lazily)
+    private val receivedMessages = HashMap<Uuid, Channel<AppMessageData>>()
     override val transactionSequence: Iterator<UByte> = AppMessageTransactionSequence().iterator()
+    private val mapAccessMutex = Mutex()
     private var appMessageCallback: CompletableDeferred<AppMessage>? = null
 
     fun init() {
@@ -34,12 +38,14 @@ class AppMessageService(
                     appMessageCallback?.complete(it)
                     appMessageCallback = null
                 }
+
                 is AppMessage.AppMessageNACK -> {
                     appMessageCallback?.complete(it)
                     appMessageCallback = null
                 }
+
                 is AppMessage.AppMessagePush -> {
-                    receivedMessages.trySend(it.appMessageData())
+                    getReceivedMessagesChannel(it.uuid.get()).trySend(it.appMessageData())
                 }
             }
         }.launchIn(scope)
@@ -78,6 +84,18 @@ class AppMessageService(
 
     suspend fun send(packet: AppCustomizationSetStockAppTitleMessage) {
         protocolHandler.send(packet)
+    }
+
+    override fun inboundAppMessages(appUuid: Uuid): Flow<AppMessageData> {
+        return suspend { getReceivedMessagesChannel(appUuid) }.asFlow().flatMapConcat { it.receiveAsFlow() }
+    }
+
+    private suspend fun getReceivedMessagesChannel(appUuid: Uuid): Channel<AppMessageData> {
+        receivedMessages[appUuid]?.let { return it }
+
+        return mapAccessMutex.withLock {
+            receivedMessages.getOrPut(appUuid) { Channel(APPMESSAGE_BUFFER_SIZE) }
+        }
     }
 }
 

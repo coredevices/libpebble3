@@ -72,7 +72,7 @@ import io.rebble.libpebblecommon.connection.endpointmanager.AppOrderManager
 import io.rebble.libpebblecommon.connection.endpointmanager.DebugPebbleProtocolSender
 import io.rebble.libpebblecommon.connection.endpointmanager.FirmwareUpdater
 import io.rebble.libpebblecommon.connection.endpointmanager.LanguagePackInstaller
-import io.rebble.libpebblecommon.connection.endpointmanager.PKJSLifecycleManager
+import io.rebble.libpebblecommon.connection.endpointmanager.CompanionAppLifecycleManager
 import io.rebble.libpebblecommon.connection.endpointmanager.RealFirmwareUpdater
 import io.rebble.libpebblecommon.connection.endpointmanager.audio.VoiceSessionManager
 import io.rebble.libpebblecommon.connection.endpointmanager.blobdb.BlobDB
@@ -491,7 +491,7 @@ fun initKoin(
                     scopedOf(::TimelineActionManager)
                     scopedOf(::AppFetchProvider)
                     scopedOf(::DebugPebbleProtocolSender)
-                    scopedOf(::PKJSLifecycleManager)
+                    scopedOf(::CompanionAppLifecycleManager)
                     scopedOf(::BlobDB)
                     scopedOf(::PhoneControlManager)
                     scopedOf(::MusicControlManager)
@@ -509,7 +509,7 @@ fun initKoin(
                             },
                             identifier = get(),
                             protocolHandler = get(),
-                            pkjsLifecycleManager = get(),
+                            companionAppLifecycleManager = get(),
                             scope = get(),
                         )
                     }

@@ -11,7 +11,7 @@ import androidx.core.net.toUri
 
 class WebViewPrivatePKJSInterface(
     jsRunner: WebViewJsRunner,
-    device: PebbleJSDevice,
+    device: CompanionAppDevice,
     scope: CoroutineScope,
     outgoingAppMessages: MutableSharedFlow<AppMessageRequest>,
     logMessages: MutableSharedFlow<String>
