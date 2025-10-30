@@ -13,7 +13,7 @@ import io.rebble.libpebblecommon.connection.endpointmanager.AppOrderManager
 import io.rebble.libpebblecommon.connection.endpointmanager.DebugPebbleProtocolSender
 import io.rebble.libpebblecommon.connection.endpointmanager.FirmwareUpdater
 import io.rebble.libpebblecommon.connection.endpointmanager.LanguagePackInstaller
-import io.rebble.libpebblecommon.connection.endpointmanager.PKJSLifecycleManager
+import io.rebble.libpebblecommon.connection.endpointmanager.CompanionAppLifecycleManager
 import io.rebble.libpebblecommon.connection.endpointmanager.audio.VoiceSessionManager
 import io.rebble.libpebblecommon.connection.endpointmanager.blobdb.BlobDB
 import io.rebble.libpebblecommon.connection.endpointmanager.musiccontrol.MusicControlManager
@@ -130,7 +130,7 @@ class RealPebbleConnector(
     private val appMessageService: AppMessageService,
     private val timelineActionManager: TimelineActionManager,
     private val blobDB: BlobDB,
-    private val pkjsLifecycleManager: PKJSLifecycleManager,
+    private val companionAppLifecycleManager: CompanionAppLifecycleManager,
     private val appFetchProvider: AppFetchProvider,
     private val debugPebbleProtocolSender: DebugPebbleProtocolSender,
     private val logDumpService: LogDumpService,
@@ -250,7 +250,7 @@ class RealPebbleConnector(
         timelineActionManager.init()
         appFetchProvider.init(watchInfo.platform.watchType)
         appMessageService.init()
-        pkjsLifecycleManager.init(identifier, watchInfo)
+        companionAppLifecycleManager.init(identifier, watchInfo)
         phoneControlManager.init()
         musicControlManager.init()
         voiceSessionManager.init()
@@ -270,7 +270,8 @@ class RealPebbleConnector(
                 logs = logDumpService,
                 coreDump = getBytesService,
                 music = musicService,
-                pkjs = pkjsLifecycleManager,
+                pkjs = companionAppLifecycleManager,
+                companionAppControl = companionAppLifecycleManager,
                 devConnection = devConnectionManager,
                 screenshot = screenshotService,
                 language = languagePackInstaller,

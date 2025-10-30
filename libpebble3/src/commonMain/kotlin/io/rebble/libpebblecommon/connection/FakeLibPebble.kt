@@ -91,6 +91,10 @@ class FakeLibPebble : LibPebble {
         // No-op
     }
 
+    override suspend fun stopApp(uuid: Uuid) {
+        // No-op
+    }
+
     override fun doStuffAfterPermissionsGranted() {
         // No-op
     }
@@ -385,6 +389,8 @@ class FakeConnectedDevice(
 
     override suspend fun launchApp(uuid: Uuid) {}
 
+    override suspend fun stopApp(uuid: Uuid) {}
+
     override val runningApp: StateFlow<Uuid?> = MutableStateFlow(null)
     override val watchInfo: WatchInfo = WatchInfo(
         runningFwVersion = FirmwareVersion.from(
@@ -421,7 +427,10 @@ class FakeConnectedDevice(
 
     override suspend fun updateTime() {}
 
-    override val inboundAppMessages: Flow<AppMessageData> = MutableSharedFlow()
+    override fun inboundAppMessages(appUuid: Uuid): Flow<AppMessageData> {
+        return MutableSharedFlow()
+    }
+
     override val transactionSequence: Iterator<UByte> = iterator { }
 
     override suspend fun sendAppMessage(appMessageData: AppMessageData): AppMessageResult =
@@ -450,7 +459,9 @@ class FakeConnectedDevice(
 
     override val musicActions: Flow<MusicAction> = MutableSharedFlow()
     override val updateRequestTrigger: Flow<Unit> = MutableSharedFlow()
+    @Deprecated("Use more generic currentCompanionAppSession instead and cast if necessary")
     override val currentPKJSSession: StateFlow<PKJSApp?> = MutableStateFlow(null)
+    override val currentCompanionAppSession: StateFlow<CompanionApp?> = MutableStateFlow(null)
 
     override suspend fun startDevConnection() {}
     override suspend fun stopDevConnection() {}
