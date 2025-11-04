@@ -79,7 +79,7 @@ class PebbleKitClassic(
 
     private fun launchOutgoingAppMessageHandlers(device: ConnectedPebble.AppMessages, scope: CoroutineScope) {
         scope.launch {
-            IntentFilter(INTENT_APP_ACK).asFlow(context).collect { intent ->
+            IntentFilter(INTENT_APP_ACK).asFlow(context, exported = true).collect { intent ->
                 logger.d { "Got outbound ack" }
                 val transactionId: Int = intent.getIntExtra(TRANSACTION_ID, 0)
                 replyACK(transactionId.toUByte())
@@ -87,7 +87,7 @@ class PebbleKitClassic(
         }
 
         scope.launch {
-            IntentFilter(INTENT_APP_NACK).asFlow(context).collect { intent ->
+            IntentFilter(INTENT_APP_NACK).asFlow(context, exported = true).collect { intent ->
                 logger.d { "Got outbound nack" }
                 val transactionId: Int = intent.getIntExtra(TRANSACTION_ID, 0)
                 replyNACK(transactionId.toUByte())
@@ -95,7 +95,7 @@ class PebbleKitClassic(
         }
 
         scope.launch {
-            IntentFilter(INTENT_APP_SEND).asFlow(context).collect { intent ->
+            IntentFilter(INTENT_APP_SEND).asFlow(context, exported = true).collect { intent ->
                 logger.d { "Got outbound message" }
                 val uuid = intent.getSerializableExtra(APP_UUID, UUID::class.java) ?: return@collect
                 val dictionary: PebbleDictionary = PebbleDictionary.fromJson(
