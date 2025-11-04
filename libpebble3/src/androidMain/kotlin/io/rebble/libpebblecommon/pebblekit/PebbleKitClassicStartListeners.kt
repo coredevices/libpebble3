@@ -5,22 +5,19 @@ import android.content.IntentFilter
 import co.touchlab.kermit.Logger
 import io.rebble.libpebblecommon.connection.LibPebble
 import io.rebble.libpebblecommon.di.LibPebbleCoroutineScope
-import io.rebble.libpebblecommon.di.LibPebbleKoinComponent
 import io.rebble.libpebblecommon.util.asFlow
 import kotlinx.coroutines.launch
 import java.util.UUID
 import kotlin.uuid.toKotlinUuid
 
-class PebbleKitClassicStartListeners() :
-    LibPebbleKoinComponent {
+class PebbleKitClassicStartListeners(
+    private val context: Context,
+    private val libPebble: LibPebble,
+    private val connectionScope: LibPebbleCoroutineScope
+) {
     companion object {
         private val logger = Logger.withTag(PebbleKitClassicStartListeners::class.simpleName!!)
     }
-
-    private val context: Context = getKoin().get()
-    private val libPebble: LibPebble = getKoin().get()
-    private val connectionScope: LibPebbleCoroutineScope = getKoin().get()
-
 
     fun init() {
         connectionScope.launch {

@@ -5,6 +5,7 @@ import io.rebble.libpebblecommon.calendar.AndroidSystemCalendar
 import io.rebble.libpebblecommon.calendar.SystemCalendar
 import io.rebble.libpebblecommon.calls.SystemCallLog
 import io.rebble.libpebblecommon.connection.AppContext
+import io.rebble.libpebblecommon.connection.LibPebble
 import io.rebble.libpebblecommon.connection.OtherPebbleApps
 import io.rebble.libpebblecommon.connection.PhoneCapabilities
 import io.rebble.libpebblecommon.connection.PlatformFlags
@@ -28,6 +29,8 @@ import io.rebble.libpebblecommon.notification.NotificationListenerConnection
 import io.rebble.libpebblecommon.notification.processor.BasicNotificationProcessor
 import io.rebble.libpebblecommon.packets.PhoneAppVersion
 import io.rebble.libpebblecommon.packets.ProtocolCapsFlag
+import io.rebble.libpebblecommon.pebblekit.PebbleKitClassicStartListeners
+import io.rebble.libpebblecommon.pebblekit.PebbleKitProviderNotifier
 import io.rebble.libpebblecommon.util.OtherPebbleAndroidApps
 import io.rebble.libpebblecommon.util.SystemGeolocation
 import org.koin.core.module.Module
@@ -88,4 +91,7 @@ actual val platformModule: Module = module {
     scope<ConnectionScope> {
         scopedOf(::AndroidBtClassicConnector) bind BtClassicConnector::class
     }
+
+    single { PebbleKitClassicStartListeners(get(), get(), get()) }
+    single { PebbleKitProviderNotifier(get<LibPebble>(), get(), get()) }
 }
