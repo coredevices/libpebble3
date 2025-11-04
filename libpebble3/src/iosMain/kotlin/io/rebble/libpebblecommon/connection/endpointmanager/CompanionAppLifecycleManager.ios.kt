@@ -8,6 +8,6 @@ actual fun createPlatformSpecificCompanionAppControl(
     device: CompanionAppDevice,
     appInfo: PbwAppInfo
 ): CompanionApp? {
-    // PebbleKit iOS is not supported (yet?)
+    // PebbleKit iOS does not work through the phone - nothing to do here
     return null
 }
