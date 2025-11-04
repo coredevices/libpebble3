@@ -13,14 +13,14 @@ import kotlin.uuid.toKotlinUuid
 class PebbleKitClassicStartListeners(
     private val context: Context,
     private val libPebble: LibPebble,
-    private val connectionScope: LibPebbleCoroutineScope
+    private val coroutineScope: LibPebbleCoroutineScope
 ) {
     companion object {
         private val logger = Logger.withTag(PebbleKitClassicStartListeners::class.simpleName!!)
     }
 
     fun init() {
-        connectionScope.launch {
+        coroutineScope.launch {
             IntentFilter(INTENT_APP_START).asFlow(context, exported = true).collect { intent ->
                 logger.v { "Got intent: $intent" }
                 val uuid = intent.getSerializableExtra(APP_UUID) as UUID? ?: return@collect
@@ -29,7 +29,7 @@ class PebbleKitClassicStartListeners(
             }
         }
 
-        connectionScope.launch {
+        coroutineScope.launch {
             IntentFilter(INTENT_APP_STOP).asFlow(context, exported = true).collect { intent ->
                 val uuid = intent.getSerializableExtra(APP_UUID) as UUID? ?: return@collect
                 logger.d { "Got app stop: $uuid" }
