@@ -26,7 +26,7 @@ class PebbleKitClassicStartListeners() :
         connectionScope.launch {
             IntentFilter(INTENT_APP_START).asFlow(context, exported = true).collect { intent ->
                 logger.v { "Got intent: $intent" }
-                val uuid = intent.getSerializableExtra(APP_UUID, UUID::class.java) ?: return@collect
+                val uuid = intent.getSerializableExtra(APP_UUID) as UUID? ?: return@collect
                 logger.d { "Got app start: $uuid" }
                 libPebble.launchApp(uuid.toKotlinUuid())
             }
@@ -34,7 +34,7 @@ class PebbleKitClassicStartListeners() :
 
         connectionScope.launch {
             IntentFilter(INTENT_APP_STOP).asFlow(context, exported = true).collect { intent ->
-                val uuid = intent.getSerializableExtra(APP_UUID, UUID::class.java) ?: return@collect
+                val uuid = intent.getSerializableExtra(APP_UUID) as UUID? ?: return@collect
                 logger.d { "Got app stop: $uuid" }
                 libPebble.stopApp(uuid.toKotlinUuid())
             }
