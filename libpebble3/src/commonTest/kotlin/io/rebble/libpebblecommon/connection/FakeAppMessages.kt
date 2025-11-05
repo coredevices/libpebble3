@@ -7,13 +7,13 @@ import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.consumeAsFlow
+import kotlinx.coroutines.flow.filter
+import kotlin.uuid.Uuid
 
 class FakeAppMessages: ConnectedPebble.AppMessages {
     val inbound = Channel<AppMessageData>(Channel.RENDEZVOUS)
     val outbound = Channel<AppMessageData>(Channel.RENDEZVOUS, onBufferOverflow = BufferOverflow.DROP_OLDEST)
     val outboundResults = Channel<AppMessageResult>(Channel.RENDEZVOUS, onBufferOverflow = BufferOverflow.DROP_OLDEST)
-
-    override val inboundAppMessages: Flow<AppMessageData> = inbound.consumeAsFlow()
 
     override suspend fun sendAppMessage(appMessageData: AppMessageData): AppMessageResult {
         return if (outbound.trySend(appMessageData).isSuccess) {
@@ -28,6 +28,8 @@ class FakeAppMessages: ConnectedPebble.AppMessages {
     override suspend fun sendAppMessageResult(appMessageResult: AppMessageResult) {
         outboundResults.send(appMessageResult)
     }
+
+    override fun inboundAppMessages(appUuid: Uuid): Flow<AppMessageData> = inbound.consumeAsFlow().filter { it.uuid == appUuid }
 
     override val transactionSequence: Iterator<UByte> = AppMessageTransactionSequence().iterator()
 }
