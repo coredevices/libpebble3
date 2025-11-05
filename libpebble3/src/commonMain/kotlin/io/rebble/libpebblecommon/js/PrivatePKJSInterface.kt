@@ -6,6 +6,7 @@ import io.rebble.cobble.shared.data.js.fromWatchInfo
 import io.rebble.libpebblecommon.services.appmessage.AppMessageResult
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.filter
