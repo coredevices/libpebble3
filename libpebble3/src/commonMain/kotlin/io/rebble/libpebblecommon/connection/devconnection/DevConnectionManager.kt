@@ -1,12 +1,10 @@
 package io.rebble.libpebblecommon.connection.devconnection
 
-import co.touchlab.kermit.Logger
 import io.rebble.libpebblecommon.connection.ConnectedPebble
 import io.rebble.libpebblecommon.connection.PebbleIdentifier
 import io.rebble.libpebblecommon.connection.PebbleProtocolHandler
-import io.rebble.libpebblecommon.connection.endpointmanager.PKJSLifecycleManager
+import io.rebble.libpebblecommon.connection.endpointmanager.CompanionAppLifecycleManager
 import io.rebble.libpebblecommon.di.ConnectionCoroutineScope
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,7 +22,7 @@ class DevConnectionManager(
     private val transport: Flow<DevConnectionTransport>,
     private val identifier: PebbleIdentifier,
     private val protocolHandler: PebbleProtocolHandler,
-    private val pkjsLifecycleManager: PKJSLifecycleManager,
+    private val companionAppLifecycleManager: CompanionAppLifecycleManager,
     private val scope: ConnectionCoroutineScope
 ): ConnectedPebble.DevConnection {
     private val job: MutableStateFlow<Job?> = MutableStateFlow(null)
@@ -35,7 +33,7 @@ class DevConnectionManager(
             false
         )
     override suspend fun startDevConnection() {
-        val inboundPKJSLogs = pkjsLifecycleManager.currentPKJSSession.flatMapLatest { it?.logMessages ?: emptyFlow() }
+        val inboundPKJSLogs = companionAppLifecycleManager.currentPKJSSession.flatMapLatest { it?.logMessages ?: emptyFlow() }
         job.value = scope.launch {
             var last: DevConnectionTransport? = null
             transport.onCompletion {

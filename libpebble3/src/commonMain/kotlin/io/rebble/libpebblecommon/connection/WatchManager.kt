@@ -188,6 +188,7 @@ class WatchManager(
                 btState = bluetoothStateProvider.state.value,
                 state = null,
                 firmwareUpdateState = FirmwareUpdateStatus.NotInProgress.Idle,
+                usingBtClassic = false,
             )
         }
     )
@@ -236,6 +237,7 @@ class WatchManager(
         btState: BluetoothState,
         state: ConnectingPebbleState?,
         firmwareUpdateState: FirmwareUpdateStatus,
+        usingBtClassic: Boolean,
     ): PebbleDevice =
         pebbleDeviceFactory.create(
             identifier = identifier,
@@ -252,6 +254,7 @@ class WatchManager(
             lastFirmwareUpdateState = lastFirmwareUpdateState,
             batteryLevel = batteryLevel,
             connectionFailureInfo = connectionFailureInfo,
+            usingBtClassic = usingBtClassic,
         )
 
     fun init() {
@@ -319,6 +322,7 @@ class WatchManager(
                         btState = btState,
                         state = states.currentState?.connectingPebbleState,
                         firmwareUpdateState = states.currentState?.firmwareUpdateStatus ?: FirmwareUpdateStatus.NotInProgress.Idle,
+                        usingBtClassic = device.activeConnection?.usingBtClassic == true,
                     )
 
                     // Update persisted props after connection
@@ -343,7 +347,7 @@ class WatchManager(
                             if (newProps.btClassicMacAddress != null &&
                                 device.knownWatchProps?.btClassicMacAddress == null &&
                                 blePlatformConfig.supportsBtClassic &&
-                                watchConfig.value.preferBtClassic &&
+                                watchConfig.value.preferBtClassicV2 &&
                                 identifier is PebbleBleIdentifier &&
                                 newProps.color?.platform?.supportsBtClassic() == true)
                                 {
@@ -494,7 +498,7 @@ class WatchManager(
                 }
             }
             val overrideBtClassicAddress = when {
-                blePlatformConfig.supportsBtClassic && watchConfig.value.preferBtClassic &&
+                blePlatformConfig.supportsBtClassic && watchConfig.value.preferBtClassicV2 &&
                         identifier is PebbleBleIdentifier && watch.color().platform.supportsBtClassic() &&
                         watch.knownWatchProps?.btClassicMacAddress != null -> UseBtClassicAddress(watch.knownWatchProps.btClassicMacAddress)
 
@@ -714,4 +718,5 @@ fun WatchType.supportsBtClassic(): Boolean = when (this) {
     WatchType.CHALK -> true
     WatchType.DIORITE -> false
     WatchType.EMERY -> false
+    WatchType.FLINT -> false
 }

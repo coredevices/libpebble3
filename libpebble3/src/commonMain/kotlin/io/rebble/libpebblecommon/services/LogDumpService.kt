@@ -32,6 +32,7 @@ class LogDumpService(
 ) : ProtocolService, ConnectedPebble.Logs {
     private val logger = Logger.withTag("LogDumpService")
     private var supportsInfiniteLogDump = false
+    private var successiveGenerationTimeouts = 0
 
     fun init(supportsInfiniteLogDump: Boolean) {
         this.supportsInfiniteLogDump = supportsInfiniteLogDump
@@ -103,9 +104,14 @@ class LogDumpService(
                         writeChannel.writeLine(logString)
                     }
                 }
+            successiveGenerationTimeouts = 0
         } catch (_: TimeoutCancellationException) {
             logger.w { "Timeout receiving logs for generation $generation" }
             writeChannel.writeLine("!!! Timeout receiving logs for this generation !!!")
+            if (++successiveGenerationTimeouts > SUCCESSIVE_LOG_DUMP_TIMEOUTS_ALLOWED) {
+                logger.e { "Successive log dump timeouts; aborting" }
+                return false
+            }
         } finally {
             logger.d { "finished generation $generation" }
         }
@@ -114,7 +120,8 @@ class LogDumpService(
 
     companion object {
         private val LOG_RECEIVE_TIMEOUT = 5.seconds
-        private val NUM_GENERATIONS_LEGACY = 4
+        private const val NUM_GENERATIONS_LEGACY = 4
+        private const val SUCCESSIVE_LOG_DUMP_TIMEOUTS_ALLOWED = 2
     }
 }
 

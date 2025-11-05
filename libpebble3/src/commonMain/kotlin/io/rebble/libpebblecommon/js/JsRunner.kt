@@ -14,7 +14,7 @@ abstract class JsRunner(
     val appInfo: PbwAppInfo,
     val lockerEntry: LockerEntry,
     val jsPath: Path,
-    val device: PebbleJSDevice,
+    val device: CompanionAppDevice,
     private val urlOpenRequests: Channel<String>,
 ) {
     abstract suspend fun start()

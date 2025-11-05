@@ -40,7 +40,7 @@ abstract class PKJSRunnerTests(
         appInfo: PbwAppInfo,
         lockerEntry: LockerEntry,
         jsPath: Path,
-        device: PebbleJSDevice,
+        device: CompanionAppDevice,
         urlOpenRequests: Channel<String>,
         logMessages: MutableSharedFlow<String>
     ) -> JsRunner
@@ -97,7 +97,7 @@ abstract class PKJSRunnerTests(
             APPINFO.copy(uuid = uuid.toString()),
             LOCKERENTRY.copy(id = uuid),
             writeJS(js),
-            PebbleJSDevice(
+            CompanionAppDevice(
                 watch.identifier,
                 watch.watchInfo,
                 appMessages

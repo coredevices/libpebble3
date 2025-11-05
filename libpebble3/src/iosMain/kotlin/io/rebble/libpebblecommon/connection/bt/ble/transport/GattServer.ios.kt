@@ -348,7 +348,7 @@ actual class GattServer(
     }
 }
 
-private val SEND_TIMEOUT = 5.seconds
+private val SEND_TIMEOUT = 8.seconds
 
 
 actual fun openGattServer(appContext: AppContext, bleConfigFlow: BleConfigFlow): GattServer? {

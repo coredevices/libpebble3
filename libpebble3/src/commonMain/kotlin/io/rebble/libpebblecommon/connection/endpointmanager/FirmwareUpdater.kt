@@ -55,12 +55,12 @@ interface FirmwareUpdater : ConnectedPebble.FirmwareUpdate {
         }
 
         sealed class Active : FirmwareUpdateStatus() {
-            abstract val update: FirmwareUpdateCheckResult
+            abstract val update: FirmwareUpdateCheckResult.FoundUpdate
         }
 
-        data class WaitingToStart(override val update: FirmwareUpdateCheckResult) : Active()
+        data class WaitingToStart(override val update: FirmwareUpdateCheckResult.FoundUpdate) : Active()
         data class InProgress(
-            override val update: FirmwareUpdateCheckResult,
+            override val update: FirmwareUpdateCheckResult.FoundUpdate,
             val progress: StateFlow<Float>,
         ) : Active()
 
@@ -68,7 +68,7 @@ interface FirmwareUpdater : ConnectedPebble.FirmwareUpdate {
          * Won't be in this state for long (we'll be disconnected very soon, at which point no-one
          * is looking at this state).
          */
-        data class WaitingForReboot(override val update: FirmwareUpdateCheckResult) : Active()
+        data class WaitingForReboot(override val update: FirmwareUpdateCheckResult.FoundUpdate) : Active()
     }
 }
 
@@ -133,7 +133,7 @@ class RealFirmwareUpdater(
     private suspend fun sendFirmwareParts(
         manifest: PbzManifestWrapper,
         offset: UInt,
-        update: FirmwareUpdateCheckResult,
+        update: FirmwareUpdateCheckResult.FoundUpdate,
     ) {
         var totalSent = 0u
         val firmware = manifest.manifest.firmware
@@ -228,7 +228,7 @@ class RealFirmwareUpdater(
         resourcesCookie?.let { putBytesSession.sendInstall(it) }
     }
 
-    private suspend fun tryStartUpdateMutex(update: FirmwareUpdateCheckResult): Boolean {
+    private suspend fun tryStartUpdateMutex(update: FirmwareUpdateCheckResult.FoundUpdate): Boolean {
         startMutex.withLock {
             if (_firmwareUpdateState.value !is FirmwareUpdateStatus.NotInProgress) {
                 logger.w { "Firmware update already in progress!" }
@@ -261,7 +261,7 @@ class RealFirmwareUpdater(
                     FirmwareUpdateErrorStarting.ErrorParsingPbz)
                 return@launch
             }
-            val update = FirmwareUpdateCheckResult(
+            val update = FirmwareUpdateCheckResult.FoundUpdate(
                 version = updateToVersion,
                 url = "",
                 notes = "Sideloaded",
@@ -274,7 +274,7 @@ class RealFirmwareUpdater(
         }
     }
 
-    override fun updateFirmware(update: FirmwareUpdateCheckResult) {
+    override fun updateFirmware(update: FirmwareUpdateCheckResult.FoundUpdate) {
         connectionCoroutineScope.launch {
             logger.d { "updateFirmware: $update" }
             val fwupProps = props
@@ -311,7 +311,7 @@ class RealFirmwareUpdater(
     private suspend fun beginFirmwareUpdate(
         pbzFw: PbzFirmware,
         offset: UInt,
-        update: FirmwareUpdateCheckResult,
+        update: FirmwareUpdateCheckResult.FoundUpdate,
         fwupProps: FwupProperties,
     ) {
         logger.d { "beginFirmwareUpdate" }

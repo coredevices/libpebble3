@@ -148,7 +148,7 @@ class WatchManagerTest {
 
         override fun sideloadFirmware(path: Path) {}
 
-        override fun updateFirmware(update: FirmwareUpdateCheckResult) {}
+        override fun updateFirmware(update: FirmwareUpdateCheckResult.FoundUpdate) {}
 
         override fun checkforFirmwareUpdate() {}
     }
@@ -187,7 +187,7 @@ class WatchManagerTest {
             TODO("Not yet implemented")
         }
 
-        override suspend fun checkForFirmwareUpdate(watch: WatchInfo): FirmwareUpdateCheckResult? {
+        override suspend fun checkForFirmwareUpdate(watch: WatchInfo): FirmwareUpdateCheckResult {
             TODO("Not yet implemented")
         }
 

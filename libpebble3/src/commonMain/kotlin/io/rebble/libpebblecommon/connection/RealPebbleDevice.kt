@@ -26,6 +26,7 @@ class PebbleDeviceFactory {
         lastFirmwareUpdateState: FirmwareUpdateStatus,
         batteryLevel: Int?,
         connectionFailureInfo: ConnectionFailureInfo?,
+        usingBtClassic: Boolean,
     ): PebbleDevice {
         val pebbleDevice = RealPebbleDevice(
             identifier = identifier,
@@ -67,7 +68,7 @@ class PebbleDeviceFactory {
                     watchType = state.watchInfo.platform,
                     color = state.watchInfo.color,
                 )
-                val activeDevice = RealActiveDevice(identifier, watchConnector)
+                val activeDevice = RealActiveDevice(identifier, watchConnector, usingBtClassic)
                 when (state) {
                     is ConnectingPebbleState.Connected.ConnectedInPrf ->
                         RealConnectedPebbleDeviceInRecovery(
@@ -98,14 +99,14 @@ class PebbleDeviceFactory {
                     connectGoal) -> when (knownDevice) {
                 null -> RealConnectingPebbleDevice(
                     pebbleDevice = pebbleDevice,
-                    activeDevice = RealActiveDevice(identifier, watchConnector),
+                    activeDevice = RealActiveDevice(identifier, watchConnector, usingBtClassic),
                     negotiating = state is ConnectingPebbleState.Negotiating,
                     rebootingAfterFirmwareUpdate = lastFirmwareUpdateState !is FirmwareUpdateStatus.NotInProgress,
                 )
 
                 else -> RealConnectingKnownPebbleDevice(
                     knownDevice = knownDevice,
-                    activeDevice = RealActiveDevice(identifier, watchConnector),
+                    activeDevice = RealActiveDevice(identifier, watchConnector, usingBtClassic),
                     negotiating = state is ConnectingPebbleState.Negotiating,
                     rebootingAfterFirmwareUpdate = lastFirmwareUpdateState !is FirmwareUpdateStatus.NotInProgress,
                 )
@@ -184,6 +185,7 @@ internal class RealKnownPebbleDevice(
 internal class RealActiveDevice(
     private val identifier: PebbleIdentifier,
     private val watchConnector: WatchConnector,
+    override val usingBtClassic: Boolean,
 ) : ActiveDevice {
     override fun disconnect() {
         watchConnector.requestDisconnection(identifier)
@@ -247,6 +249,7 @@ internal class RealConnectedPebbleDevice(
     ConnectedPebble.CoreDump by services.coreDump,
     ConnectedPebble.Music by services.music,
     ConnectedPebble.PKJS by services.pkjs,
+    ConnectedPebble.CompanionAppControl by services.companionAppControl,
     ConnectedPebble.DevConnection by services.devConnection,
     ConnectedPebble.Screenshot by services.screenshot,
     ConnectedPebble.Language by services.language {

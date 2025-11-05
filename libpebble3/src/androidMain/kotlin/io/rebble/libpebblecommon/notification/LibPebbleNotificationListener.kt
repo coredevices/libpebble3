@@ -191,7 +191,11 @@ class LibPebbleNotificationListener : NotificationListenerService(), LibPebbleKo
 
             listenerHints
         }.distinctUntilChanged().collect {
-            requestListenerHints(it)
+            try {
+                requestListenerHints(it)
+            } catch (e: SecurityException) {
+                logger.e(e) {"error setting listener hints" }
+            }
         }
     }
 

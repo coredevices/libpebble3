@@ -11,7 +11,7 @@ import kotlin.uuid.Uuid
 
 abstract class PKJSInterface(
     protected val jsRunner: JsRunner,
-    protected val device: PebbleJSDevice,
+    protected val device: CompanionAppDevice,
     private val libPebble: LibPebble,
     private val jsTokenUtil: JsTokenUtil,
 ) {

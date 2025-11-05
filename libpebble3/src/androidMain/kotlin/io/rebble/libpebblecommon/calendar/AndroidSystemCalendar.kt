@@ -100,27 +100,48 @@ private fun resolveCalendarInstance(
     ownerEmail: String
 ): CalendarEvent? {
     val id = cursor.getNullableColumnIndex(CalendarContract.Instances._ID)
-        ?.let { cursor.getLong(it) } ?: return null
+        ?.let { cursor.getLong(it) } ?: run {
+            logger.w("Calendar instance has no ID")
+            return null
+    }
     val eventId = cursor.getNullableColumnIndex(CalendarContract.Instances.EVENT_ID)
-        ?.let { cursor.getLong(it) } ?: return null
+        ?.let { cursor.getLong(it) } ?: run {
+            logger.w("Calendar instance has no event ID")
+            return null
+    }
     val calendarId = cursor.getNullableColumnIndex(CalendarContract.Instances.CALENDAR_ID)
-        ?.let { cursor.getLong(it) } ?: return null
+        ?.let { cursor.getLong(it) } ?: run {
+            logger.w("Calendar instance has no calendar ID")
+            return null
+    }
     val title = cursor.getNullableColumnIndex(CalendarContract.Instances.TITLE)
         ?.let { cursor.getString(it) } ?: "Untitled event"
     val description = cursor.getNullableColumnIndex(CalendarContract.Instances.DESCRIPTION)
         ?.let { cursor.getString(it) } ?: ""
     val start = cursor.getNullableColumnIndex(CalendarContract.Instances.BEGIN)
-        ?.let { cursor.getLong(it) } ?: return null
+        ?.let { cursor.getLong(it) } ?: run {
+        logger.w("Calendar instance has no BEGIN")
+        return null
+    }
     val end = cursor.getNullableColumnIndex(CalendarContract.Instances.END)
-        ?.let { cursor.getLong(it) } ?: return null
+        ?.let { cursor.getLong(it) } ?: run {
+        logger.w("Calendar instance has no END")
+        return null
+    }
     val allDay = cursor.getNullableColumnIndex(CalendarContract.Instances.ALL_DAY)
         ?.let { cursor.getInt(it) } ?: false
     val location = cursor.getNullableColumnIndex(CalendarContract.Instances.EVENT_LOCATION)
         ?.let { cursor.getString(it) }
     val availability = cursor.getNullableColumnIndex(CalendarContract.Instances.AVAILABILITY)
-        ?.let { cursor.getInt(it) } ?: return null
+        ?.let { cursor.getInt(it) } ?: run {
+        logger.w("Calendar instance has no AVAILABILITY")
+        return null
+    }
     val status = cursor.getNullableColumnIndex(CalendarContract.Instances.STATUS)
-        ?.let { cursor.getInt(it) } ?: return null
+        ?.let { cursor.getInt(it) } ?: run {
+        logger.w("Calendar instance has no STATUS")
+        return null
+    }
     val recurrenceRule = cursor.getNullableColumnIndex(CalendarContract.Instances.RRULE)
         ?.let { cursor.getString(it) }
     val recurrenceDate = cursor.getNullableColumnIndex(CalendarContract.Instances.RDATE)
@@ -301,14 +322,14 @@ private fun resolveReminders(eventId: Long, contentResolver: ContentResolver): L
     } ?: listOf()
 }
 
+private val logger = Logger.withTag("AndroidSystemCalendar")
+
 class AndroidSystemCalendar(
     private val contentResolver: ContentResolver,
     private val libPebbleCoroutineScope: LibPebbleCoroutineScope,
     private val appContext: AppContext,
     private val privateLogger: PrivateLogger,
 ) : SystemCalendar {
-    private val logger = Logger.withTag("AndroidSystemCalendar")
-
     override suspend fun getCalendars(): List<CalendarEntity> {
         return try {
             return contentResolver.query(calendarUri, calendarProjection, null, null, null)

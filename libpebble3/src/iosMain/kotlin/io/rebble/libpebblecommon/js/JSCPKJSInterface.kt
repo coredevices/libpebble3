@@ -2,9 +2,8 @@ package io.rebble.libpebblecommon.js
 
 import co.touchlab.kermit.Logger
 import io.rebble.libpebblecommon.connection.LibPebble
-import platform.JavaScriptCore.JSContext
 
-class JSCPKJSInterface(jsRunner: JsRunner, device: PebbleJSDevice, libPebble: LibPebble, jsTokenUtil: JsTokenUtil) :
+class JSCPKJSInterface(jsRunner: JsRunner, device: CompanionAppDevice, libPebble: LibPebble, jsTokenUtil: JsTokenUtil) :
     PKJSInterface(jsRunner, device, libPebble, jsTokenUtil), RegisterableJsInterface {
     private val logger = Logger.withTag("JSCPKJSInterface")
     override val interf = mapOf(

@@ -38,11 +38,11 @@ internal class AppMessageTest {
         assertEquals("Hello World", list[1].dataAsString)
         assertEquals("Emoji: \uD83D\uDC7D.", list[2].dataAsString)
         assertEquals(-7, list[3].dataAsSignedNumber)
-        assertEquals(177, list[4].dataAsUnsignedNumber)
+        assertEquals(177u, list[4].dataAsUnsignedNumber)
         assertEquals(-20, list[5].dataAsSignedNumber)
-        assertEquals(49885, list[6].dataAsUnsignedNumber)
+        assertEquals(49885u, list[6].dataAsUnsignedNumber)
         assertEquals(-707573, list[7].dataAsSignedNumber)
-        assertEquals(2448461, list[8].dataAsUnsignedNumber)
+        assertEquals(2448461u, list[8].dataAsUnsignedNumber)
 
         assertEquals(testPushMessage, newMessage)
     }

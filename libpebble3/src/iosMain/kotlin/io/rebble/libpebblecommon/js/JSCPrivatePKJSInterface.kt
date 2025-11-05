@@ -4,12 +4,11 @@ import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.io.files.Path
-import platform.JavaScriptCore.JSContext
 
 class JSCPrivatePKJSInterface(
     private val jsPath: Path,
     jsRunner: JsRunner,
-    device: PebbleJSDevice,
+    device: CompanionAppDevice,
     scope: CoroutineScope,
     outgoingAppMessages: MutableSharedFlow<AppMessageRequest>,
     logMessages: MutableSharedFlow<String>

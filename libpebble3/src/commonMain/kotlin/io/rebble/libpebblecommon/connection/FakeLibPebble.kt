@@ -91,6 +91,10 @@ class FakeLibPebble : LibPebble {
         // No-op
     }
 
+    override suspend fun stopApp(uuid: Uuid) {
+        // No-op
+    }
+
     override fun doStuffAfterPermissionsGranted() {
         // No-op
     }
@@ -281,12 +285,12 @@ fun fakeWatch(connected: Boolean = Random.nextBoolean()): PebbleDevice {
     return if (connected) {
         val updating = Random.nextBoolean()
         val fwupState = if (updating) {
-            val fakeUpdate = FirmwareUpdateCheckResult(
+            val fakeUpdate = FirmwareUpdateCheckResult.FoundUpdate(
                 version = FirmwareVersion.from(
                     "v4.9.9-core1",
                     isRecovery = false,
                     gitHash = "",
-                    timestamp = kotlin.time.Instant.DISTANT_PAST,
+                    timestamp = Instant.DISTANT_PAST,
                     isDualSlot = false,
                     isSlot0 = false,
                 )!!,
@@ -298,7 +302,7 @@ fun fakeWatch(connected: Boolean = Random.nextBoolean()): PebbleDevice {
             FirmwareUpdater.FirmwareUpdateStatus.NotInProgress.Idle
         }
         val fwupAvailable = if (!updating && Random.nextBoolean()) {
-            FirmwareUpdateCheckResult(
+            FirmwareUpdateCheckResult.FoundUpdate(
                 version = FirmwareVersion.from(
                     "v4.9.9-core2",
                     isRecovery = false,
@@ -353,6 +357,7 @@ class FakeConnectedDevice(
     override val serial: String = "XXXXXXXXXXXX",
     override val runningFwVersion: String = "v1.2.3-core",
     override val connectionFailureInfo: ConnectionFailureInfo?,
+    override val usingBtClassic: Boolean = false,
 ) : ConnectedPebbleDevice {
 
     override fun forget() {}
@@ -378,11 +383,13 @@ class FakeConnectedDevice(
 
     override fun sideloadFirmware(path: Path) {}
 
-    override fun updateFirmware(update: FirmwareUpdateCheckResult) {}
+    override fun updateFirmware(update: FirmwareUpdateCheckResult.FoundUpdate) {}
 
     override fun checkforFirmwareUpdate() {}
 
     override suspend fun launchApp(uuid: Uuid) {}
+
+    override suspend fun stopApp(uuid: Uuid) {}
 
     override val runningApp: StateFlow<Uuid?> = MutableStateFlow(null)
     override val watchInfo: WatchInfo = WatchInfo(
@@ -420,7 +427,10 @@ class FakeConnectedDevice(
 
     override suspend fun updateTime() {}
 
-    override val inboundAppMessages: Flow<AppMessageData> = MutableSharedFlow()
+    override fun inboundAppMessages(appUuid: Uuid): Flow<AppMessageData> {
+        return MutableSharedFlow()
+    }
+
     override val transactionSequence: Iterator<UByte> = iterator { }
 
     override suspend fun sendAppMessage(appMessageData: AppMessageData): AppMessageResult =
@@ -449,7 +459,9 @@ class FakeConnectedDevice(
 
     override val musicActions: Flow<MusicAction> = MutableSharedFlow()
     override val updateRequestTrigger: Flow<Unit> = MutableSharedFlow()
+    @Deprecated("Use more generic currentCompanionAppSession instead and cast if necessary")
     override val currentPKJSSession: StateFlow<PKJSApp?> = MutableStateFlow(null)
+    override val currentCompanionAppSession: StateFlow<CompanionApp?> = MutableStateFlow(null)
 
     override suspend fun startDevConnection() {}
     override suspend fun stopDevConnection() {}

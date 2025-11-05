@@ -64,7 +64,7 @@ data class WatchConfig(
     val ignoreMissingPrf: Boolean = false,
     val lanDevConnection: Boolean = false,
     val verboseWatchManagerLogging: Boolean = false,
-    val preferBtClassic: Boolean = true,
+    val preferBtClassicV2: Boolean = false,
 )
 
 class WatchConfigFlow(val flow: StateFlow<LibPebbleConfig>) {

@@ -67,7 +67,8 @@ data class LockerEntryCompatibility(
     val basalt: LockerEntryCompatibilityWatchPlatformDetails,
     val chalk: LockerEntryCompatibilityWatchPlatformDetails,
     val diorite: LockerEntryCompatibilityWatchPlatformDetails,
-    val emery: LockerEntryCompatibilityWatchPlatformDetails
+    val emery: LockerEntryCompatibilityWatchPlatformDetails,
+    val flint: LockerEntryCompatibilityWatchPlatformDetails? = null,
 )
 
 @Serializable

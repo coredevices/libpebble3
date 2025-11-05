@@ -9,12 +9,12 @@ import android.telecom.InCallService
 import android.telecom.VideoProfile
 import co.touchlab.kermit.Logger
 import io.rebble.libpebblecommon.connection.LibPebble
-import org.koin.core.component.KoinComponent
+import io.rebble.libpebblecommon.di.LibPebbleKoinComponent
 import org.koin.core.component.inject
 import kotlin.random.Random
 import kotlin.random.nextUInt
 
-class LibPebbleInCallService: InCallService(), KoinComponent {
+class LibPebbleInCallService : InCallService(), LibPebbleKoinComponent {
     companion object {
         private val logger = Logger.withTag("LibPebbleInCallService")
     }

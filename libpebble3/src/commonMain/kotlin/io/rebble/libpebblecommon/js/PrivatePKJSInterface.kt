@@ -23,7 +23,7 @@ import kotlin.uuid.Uuid
 
 abstract class PrivatePKJSInterface(
     protected val jsRunner: JsRunner,
-    private val device: PebbleJSDevice,
+    private val device: CompanionAppDevice,
     protected val scope: CoroutineScope,
     private val outgoingAppMessages: MutableSharedFlow<AppMessageRequest>,
     private val logMessages: MutableSharedFlow<String>,

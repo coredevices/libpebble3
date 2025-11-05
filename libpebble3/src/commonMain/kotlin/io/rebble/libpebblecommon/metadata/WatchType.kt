@@ -5,7 +5,9 @@ enum class WatchType(val codename: String) {
     BASALT("basalt"),
     CHALK("chalk"),
     DIORITE("diorite"),
-    EMERY("emery");
+    EMERY("emery"),
+    FLINT("flint"),
+    ;
 
     fun getCompatibleAppVariants(): List<WatchType> {
         return when (this) {
@@ -19,6 +21,7 @@ enum class WatchType(val codename: String) {
                 DIORITE,
                 APLITE
             )
+            FLINT -> listOf(FLINT, DIORITE, APLITE)
         }
     }
 

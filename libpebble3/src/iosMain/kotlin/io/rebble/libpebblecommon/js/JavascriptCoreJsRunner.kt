@@ -34,7 +34,7 @@ class JavascriptCoreJsRunner(
     private val libPebble: LibPebble,
     private val jsTokenUtil: JsTokenUtil,
 
-    device: PebbleJSDevice,
+    device: CompanionAppDevice,
     private val scope: CoroutineScope,
     appInfo: PbwAppInfo,
     lockerEntry: LockerEntry,

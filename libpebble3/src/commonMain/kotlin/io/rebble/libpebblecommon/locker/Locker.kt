@@ -37,7 +37,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withTimeout
-import kotlin.time.Clock
 import kotlinx.io.IOException
 import kotlinx.io.Source
 import kotlinx.io.buffered
@@ -45,6 +44,7 @@ import kotlinx.io.files.Path
 import kotlinx.io.files.SystemFileSystem
 import kotlinx.io.readString
 import kotlinx.io.writeString
+import kotlin.time.Clock
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 import kotlin.uuid.Uuid
@@ -229,7 +229,7 @@ class Locker(
         }
         lockerEntryDao.insertOrReplaceAndOrder(lockerEntry, config.value.lockerSyncLimit)
         return try {
-            withTimeout(15.seconds) {
+            withTimeout(40.seconds) {
                 tasks?.awaitAll()
                 true
             }
