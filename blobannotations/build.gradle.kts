@@ -19,12 +19,12 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.valueOf("VERSION_${libs.versions.jvm.toolchain.get()}")
+        targetCompatibility = JavaVersion.valueOf("VERSION_${libs.versions.jvm.toolchain.get()}")
     }
 
     kotlin {
-        jvmToolchain(17)
+        jvmToolchain(libs.versions.jvm.toolchain.get().toInt())
     }
 }
 
