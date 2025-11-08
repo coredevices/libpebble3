@@ -63,7 +63,7 @@ class AppMessageService(
             tuples = appMessageData.data.toAppMessageTuples()
         )
         protocolHandler.send(appMessage)
-        return when (val result = appMessageCallback?.await()) {
+        return when (val result = callback.await()) {
             is AppMessage.AppMessageACK -> result.appMessageResult()
             is AppMessage.AppMessageNACK -> result.appMessageResult()
             else -> throw IllegalStateException("Unexpected result: $result")
