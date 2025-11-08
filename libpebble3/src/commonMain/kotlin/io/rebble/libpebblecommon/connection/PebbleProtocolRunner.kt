@@ -3,6 +3,7 @@ package io.rebble.libpebblecommon.connection
 import co.touchlab.kermit.Logger
 import com.oldguy.common.getUShortAt
 import io.ktor.utils.io.ByteChannel
+import io.ktor.utils.io.CancellationException
 import io.ktor.utils.io.peek
 import io.ktor.utils.io.readByteArray
 import io.rebble.libpebblecommon.protocolhelpers.PebblePacket
@@ -61,6 +62,8 @@ class PebbleProtocolRunner(
                         .asUByteArray()
                 val packet = try {
                     PebblePacket.deserialize(packetBytes)
+                } catch (e: CancellationException) {
+                    throw e
                 } catch (e: Exception) {
 //                                Logger.w("error deserializing packet: $packetBytes", e)
                     null

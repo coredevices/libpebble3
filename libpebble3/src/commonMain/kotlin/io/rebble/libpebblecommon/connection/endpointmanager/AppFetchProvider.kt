@@ -13,12 +13,12 @@ import io.rebble.libpebblecommon.packets.ObjectType
 import io.rebble.libpebblecommon.services.AppFetchService
 import io.rebble.libpebblecommon.services.PutBytesService
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
+import kotlin.coroutines.cancellation.CancellationException
 import kotlin.math.roundToInt
 
 class AppFetchProvider(
@@ -42,6 +42,8 @@ class AppFetchProvider(
                         val app = try {
                             val version = locker.getApp(uuid)?.version ?: ""
                             PbwApp(pbwCache.getPBWFileForApp(uuid, version, locker))
+                        } catch (e: CancellationException) {
+                            throw e
                         } catch (e: Exception) {
                             logger.e(e) { "Failed to get app for uuid $uuid" }
                             appFetchService.sendResponse(AppFetchResponseStatus.NO_DATA)

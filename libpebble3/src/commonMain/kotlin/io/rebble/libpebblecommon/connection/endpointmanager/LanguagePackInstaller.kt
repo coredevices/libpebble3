@@ -9,6 +9,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.io.buffered
 import kotlinx.io.files.Path
 import kotlinx.io.files.SystemFileSystem
+import kotlin.coroutines.cancellation.CancellationException
 
 class LanguagePackInstaller(
     private val putBytesSession: PutBytesSession,
@@ -43,6 +44,8 @@ class LanguagePackInstaller(
                 }
                 logger.d { "installLanguagePack finished" }
                 return@withContext true
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 logger.e(e) { "Error installing language pack" }
                 return@withContext false

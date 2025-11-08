@@ -5,6 +5,7 @@ import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsChannel
 import io.ktor.http.isSuccess
+import io.ktor.utils.io.CancellationException
 import io.ktor.utils.io.readRemaining
 import io.rebble.libpebblecommon.ErrorTracker
 import io.rebble.libpebblecommon.WatchConfigFlow
@@ -72,6 +73,8 @@ class Locker(
     override suspend fun sideloadApp(pbwPath: Path): Boolean =
         try {
             sideloadApp(pbwApp = PbwApp(pbwPath), loadOnWatch = true)
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             Logger.e(e) { "Error while sideloading app" }
             errorTracker.reportError(UserFacingError.FailedToSideloadApp("Error while sideloading app"))

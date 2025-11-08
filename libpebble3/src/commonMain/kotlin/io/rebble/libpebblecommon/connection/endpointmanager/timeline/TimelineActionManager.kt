@@ -9,6 +9,7 @@ import io.rebble.libpebblecommon.services.blobdb.TimelineActionResult
 import io.rebble.libpebblecommon.services.blobdb.TimelineService
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlin.coroutines.cancellation.CancellationException
 import kotlin.uuid.Uuid
 
 class ActionOverrides {
@@ -78,6 +79,8 @@ class TimelineActionManager(
 //                    "Received action for item $itemId, but it is not a notification or pin (${item.watchDatabase})"
 //                )
 //            }
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             logger.e(e) {
                 "Error handling action for item $itemId: ${e.message}"

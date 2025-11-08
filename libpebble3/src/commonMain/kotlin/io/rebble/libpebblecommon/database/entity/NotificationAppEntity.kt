@@ -21,8 +21,9 @@ import io.rebble.libpebblecommon.structmapper.StructMappable
 import io.rebble.libpebblecommon.structmapper.StructMapper
 import io.rebble.libpebblecommon.util.DataBuffer
 import io.rebble.libpebblecommon.util.Endian
-import kotlin.time.Instant
 import kotlinx.serialization.Serializable
+import kotlin.coroutines.cancellation.CancellationException
+import kotlin.time.Instant
 
 @Immutable
 @GenerateRoomEntity(
@@ -163,6 +164,8 @@ fun DbWrite.asNotificationAppItem(): NotificationAppItem? {
             channelGroups = emptyList(),
             lastNotified = lastUpdated.asMillisecond(),
         )
+    } catch (e: CancellationException) {
+        throw e
     } catch (e: Exception) {
         logger.d("decoding app record ${e.message}", e)
         return null

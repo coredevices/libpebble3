@@ -29,6 +29,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.io.IOException
+import kotlin.coroutines.cancellation.CancellationException
 import kotlin.time.Duration.Companion.seconds
 import kotlin.uuid.Uuid
 
@@ -75,6 +76,8 @@ class KableGattConnector(
                 val kableScope = peripheral.connect()
                 GattConnectionResult.Success(KableConnectedGattClient(identifier, peripheral))
             }
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             logger.e("error connecting.. waiting for disconnection to to reason", e)
             val disconnectReason = withTimeoutOrNull(2.seconds) {

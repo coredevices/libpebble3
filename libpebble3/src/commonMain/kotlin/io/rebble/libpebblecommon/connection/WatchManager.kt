@@ -47,6 +47,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
+import kotlin.coroutines.cancellation.CancellationException
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.seconds
 
@@ -558,6 +559,8 @@ class WatchManager(
                     logger.d("watchmanager got disconnection: $identifier")
                     val connectionFailureReason = (pebbleConnector.state.value as? ConnectingPebbleState.Failed)?.reason
                     device.updateFailureReason(connectionFailureReason)
+                } catch (e: CancellationException) {
+                    throw e
                 } catch (e: Exception) {
                     // Because we call cleanup() in the `finally` block, the CoroutineExceptionHandler is not called.
                     // So catch it here just to log it.

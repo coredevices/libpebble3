@@ -212,6 +212,8 @@ class RealFirmwareUpdater(
                         }
                     }
                 }
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 throw FirmwareUpdateException.TransferFailed(
                     "Failed to transfer resources",
@@ -248,6 +250,8 @@ class RealFirmwareUpdater(
             val pbz = PbzFirmware(path)
             val manifest = try {
                  pbz.findManifestFor(fwupProps.updateToSlot)
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 logger.w(e) { "Failed to find manifest for slot ${fwupProps.updateToSlot}" }
                 _firmwareUpdateState.value = FirmwareUpdateStatus.NotInProgress.ErrorStarting(
@@ -292,6 +296,8 @@ class RealFirmwareUpdater(
             }
             val pbz = try {
                 PbzFirmware(path)
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 logger.w(e) { "Failed to parse firmware: ${e.message}" }
                 _firmwareUpdateState.value = FirmwareUpdateStatus.NotInProgress.ErrorStarting(
@@ -338,6 +344,8 @@ class RealFirmwareUpdater(
             logger.e(e) { "Firmware update failed: ${e.message}" }
         } catch (e: IllegalStateException) {
             logger.e(e) { "Firmware update failed: ${e.message}" }
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             logger.e(e) { "Firmware update failed (unknown): ${e.message}" }
         }

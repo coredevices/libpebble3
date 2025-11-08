@@ -1,13 +1,12 @@
 package io.rebble.libpebblecommon.connection.devconnection
 
 import co.touchlab.kermit.Logger
+import io.ktor.utils.io.CancellationException
 import io.ktor.utils.io.core.writeFully
 import io.rebble.libpebblecommon.connection.LibPebble
 import io.rebble.libpebblecommon.connection.PebbleIdentifier
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.withContext
 import kotlinx.io.buffered
 import kotlinx.io.files.Path
@@ -42,6 +41,8 @@ abstract class DevConnectionTransport(private val libPebble: LibPebble) {
                 }
             }
             return libPebble.sideloadApp(path)
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             logger.e(e) { "Failed to save/install bundle: ${e.message}" }
             return false

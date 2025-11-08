@@ -26,6 +26,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
+import kotlin.coroutines.cancellation.CancellationException
 
 class CompanionAppLifecycleManager(
     private val lockerPBWCache: LockerPBWCache,
@@ -65,6 +66,8 @@ class CompanionAppLifecycleManager(
             runningApp.value = createCompanionApp(pbw, lockerEntry).also {
                 it?.start(scope)
             }
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             logger.e(e) { "Failed to init Companion app for app ${lockerEntry.id}: ${e.message}" }
             runningApp.value = null

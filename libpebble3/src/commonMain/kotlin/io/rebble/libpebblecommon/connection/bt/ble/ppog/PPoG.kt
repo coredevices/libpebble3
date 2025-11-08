@@ -9,6 +9,7 @@ import io.rebble.libpebblecommon.connection.ConnectionFailureReason
 import io.rebble.libpebblecommon.connection.PebbleProtocolStreams
 import io.rebble.libpebblecommon.connection.bt.ble.BlePlatformConfig
 import io.rebble.libpebblecommon.di.ConnectionCoroutineScope
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
@@ -97,6 +98,8 @@ class PPoG(
                 ),
                 version = ppogVersion,
             )
+        } catch (e: CancellationException) {
+            throw  e
         } catch (e: Exception) {
             logger.e("error sending reset request", e)
         }
