@@ -27,7 +27,7 @@ Where the `[YOUR_PACKAGE]` is the package name of your application.
 To fully enable PebbleKit Android Classic, you have to add this provider to your `AndroidManifest.xml`:
 
 ```xml
-<providers
+<provider
     android:authorities="com.getpebble.android.provider.basalt"
     android:name="io.rebble.libpebblecommon.pebblekit.classic.PebbleKitProvider"
     tools:ignore="ExportedContentProvider"
