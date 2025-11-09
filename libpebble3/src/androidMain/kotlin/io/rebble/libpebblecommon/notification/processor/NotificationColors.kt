@@ -34,6 +34,8 @@ object HardcodedNotificationColors {
         "com.google.android.apps.maps" to 0xFF0055FF.toInt(),
         "com.google.android.apps.photos" to 0xFF0055FF.toInt(),
         "com.linkedin.android" to 0xFF0055AA.toInt(),
-        "com.slack" to 0xFFFF0055.toInt()
+        "com.slack" to 0xFFFF0055.toInt(),
+        "com.beeper.android" to 0xAA00FF.toInt(),
+        "com.discord" to 0x5500AA.toInt()
     )
 }
