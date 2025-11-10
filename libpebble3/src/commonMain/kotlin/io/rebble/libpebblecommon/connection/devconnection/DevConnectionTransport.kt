@@ -11,6 +11,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.io.buffered
 import kotlinx.io.files.Path
 import kotlinx.io.files.SystemFileSystem
+import kotlinx.coroutines.IO
 
 internal expect fun getTempPbwPath(): Path
 
