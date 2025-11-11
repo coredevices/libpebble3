@@ -14,6 +14,7 @@ import io.rebble.libpebblecommon.database.asMillisecond
 import io.rebble.libpebblecommon.database.dao.AppWithCount
 import io.rebble.libpebblecommon.database.dao.ChannelAndCount
 import io.rebble.libpebblecommon.database.dao.ContactWithCount
+import io.rebble.libpebblecommon.database.dao.WatchPreference
 import io.rebble.libpebblecommon.database.entity.CalendarEntity
 import io.rebble.libpebblecommon.database.entity.ChannelGroup
 import io.rebble.libpebblecommon.database.entity.ChannelItem
@@ -269,6 +270,12 @@ class FakeLibPebble : LibPebble {
         get() = flow { HealthSettings() }
 
     override fun updateHealthSettings(healthSettings: HealthSettings) {
+    }
+
+    override val watchPrefs: Flow<List<WatchPreference>>
+        get() = flow {  }
+
+    override fun setWatchPref(watchPref: WatchPreference) {
     }
 }
 

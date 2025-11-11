@@ -44,6 +44,7 @@ import io.rebble.libpebblecommon.connection.TokenProvider
 import io.rebble.libpebblecommon.connection.TransportConnector
 import io.rebble.libpebblecommon.connection.WatchConnector
 import io.rebble.libpebblecommon.connection.WatchManager
+import io.rebble.libpebblecommon.connection.WatchPrefs
 import io.rebble.libpebblecommon.connection.WebServices
 import io.rebble.libpebblecommon.connection.bt.BluetoothStateProvider
 import io.rebble.libpebblecommon.connection.bt.RealBluetoothStateProvider
@@ -90,6 +91,7 @@ import io.rebble.libpebblecommon.database.Database
 import io.rebble.libpebblecommon.database.RealBlobDbDatabaseManager
 import io.rebble.libpebblecommon.database.dao.LockerEntryRealDao
 import io.rebble.libpebblecommon.database.dao.NotificationAppRealDao
+import io.rebble.libpebblecommon.database.dao.RealWatchPrefs
 import io.rebble.libpebblecommon.database.dao.TimelineNotificationRealDao
 import io.rebble.libpebblecommon.database.entity.LockerEntryDao
 import io.rebble.libpebblecommon.database.entity.NotificationAppItemDao
@@ -316,6 +318,7 @@ fun initKoin(
                 single { get<Database>().lockerAppPermissionDao() }
                 single { get<Database>().notificationsDao() }
                 single { get<Database>().contactDao() }
+                single { get<Database>().watchPrefDao() }
                 singleOf(::WatchManager) bind WatchConnector::class
                 single { bleScanner() }
                 singleOf(::RealScanning) bind Scanning::class
@@ -323,11 +326,13 @@ fun initKoin(
                 singleOf(::Locker)
                 singleOf(::PrivateLogger)
                 singleOf(::Housekeeping)
+                singleOf(::RealWatchPrefs) bind WatchPrefs::class
                 singleOf(::WebSyncManager) bind RequestSync::class
                 single { WebSyncManagerProvider { get() } }
                 single { createTimeChanged(get()) }
                 single {
                     LibPebble3(
+                        get(),
                         get(),
                         get(),
                         get(),

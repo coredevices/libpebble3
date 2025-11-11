@@ -29,8 +29,12 @@ class BlobDBService(
 ) : ProtocolService {
     private val pending: MutableMap<UShort, CompletableDeferred<BlobResponse>> = mutableMapOf()
     private val logger = Logger.withTag("BlobDBService")
-    private val _writes = MutableSharedFlow<DbWrite>()
+    // Add a replay cache so that BlobDb can catch up with the post-connect WriteBack sync when it
+    // is initialized (it will actually only be once message - it waits for that to be ACKed).
+    private val _writes = MutableSharedFlow<DbWrite>(replay = 20)
     val writes = _writes.asSharedFlow()
+    private val _syncCompletes = MutableSharedFlow<BlobDatabase>(replay = 20)
+    val syncCompletes = _syncCompletes.asSharedFlow()
 
     fun init() {
         scope.launch {
@@ -67,12 +71,17 @@ class BlobDBService(
                             )
                         )
                     }
+
+                    is BlobDB2Command.SyncDone -> {
+                        logger.d("SyncDone: token=${packet.token}")
+                        _syncCompletes.emit(BlobDatabase.from(packet.database.get()))
+                    }
                 }
             }
         }
     }
 
-    private suspend fun syncDirtyDbs() {
+    suspend fun syncDirtyDbs() {
         val resp = send(BlobDB2Command.DirtyDatabase())
         val dirty = resp as? BlobDB2Response.DirtyDatabaseResponse
         logger.d("DirtyDatabase: ${dirty?.databaseIds}")
@@ -116,7 +125,7 @@ class BlobDBService(
 //        logger.d("insert $name res=$res")
 //    }
 
-    private suspend fun startSync(db: BlobDatabase) {
+    suspend fun startSync(db: BlobDatabase) {
         logger.d("startSync for $db")
         val token = 0
         val tokenUShort = token.toUShort()

@@ -11,6 +11,7 @@ import io.rebble.libpebblecommon.database.dao.NotificationAppRealDao
 import io.rebble.libpebblecommon.database.dao.TimelineNotificationRealDao
 import io.rebble.libpebblecommon.database.dao.TimelinePinRealDao
 import io.rebble.libpebblecommon.database.dao.TimelineReminderRealDao
+import io.rebble.libpebblecommon.database.dao.WatchPrefRealDao
 import io.rebble.libpebblecommon.database.entity.WatchSettingsDao
 import io.rebble.libpebblecommon.di.ConnectionCoroutineScope
 import io.rebble.libpebblecommon.di.PlatformConfig
@@ -21,9 +22,12 @@ import io.rebble.libpebblecommon.packets.blobdb.BlobDB2Response
 import io.rebble.libpebblecommon.packets.blobdb.BlobResponse
 import io.rebble.libpebblecommon.services.blobdb.BlobDBService
 import io.rebble.libpebblecommon.services.blobdb.WriteType
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
@@ -45,6 +49,7 @@ data class BlobDbDaos(
     private val notificationAppRealDao: NotificationAppRealDao,
     private val watchSettingsDao: WatchSettingsDao,
     private val platformConfig: PlatformConfig,
+    private val watchPrefDao: WatchPrefRealDao,
 ) {
     fun get(): Set<BlobDbDao<BlobDbRecord>> = buildSet {
         add(lockerEntryDao)
@@ -55,6 +60,7 @@ data class BlobDbDaos(
         if (platformConfig.syncNotificationApps) {
             add(notificationAppRealDao)
         }
+        add(watchPrefDao)
         // because typing
     } as Set<BlobDbDao<BlobDbRecord>>
 }
@@ -87,6 +93,8 @@ class BlobDB(
     private val random = Random
     // To prevent overlapping insert/delete operations
     private val operationLock = Mutex()
+    // TODO this needs to be dynamic based on capabilities/OS/etc
+    private val databasesWhichWillSync = MutableStateFlow(setOf(BlobDatabase.WatchPrefs))
 
     /**
      * Run [query] continually, updating the query timestamp (so that it does not become stale).
@@ -137,20 +145,60 @@ class BlobDB(
         capabilities: Set<ProtocolCapsFlag>,
     ) {
         watchScope.launch {
+//            blobDBService.syncDirtyDbs()
+            if (unfaithful || !previouslyConnected) {
+                // Mark all of our local DBs not synched (before handling any writes from the watch)
+                blobDatabases.get().forEach { db ->
+                    db.markAllDeletedFromWatch(identifier.asString)
+                }
+            }
+
+            watchScope.launch {
+                blobDBService.writes.collect { message ->
+                    logger.v { "write: $message" }
+                    val dao = blobDatabases.get().find { it.databaseId() == message.database }
+                    val result = dao?.handleWrite(
+                        write = message,
+                        transport = identifier.asString,
+                    ) ?: run {
+                        logger.v { "unhandled write: $message (key=${message.key.joinToString()} value=${message.value.joinToString()}" }
+                        BlobResponse.BlobStatus.Success
+                    }
+                    val response = when (message.writeType) {
+                        WriteType.Write -> BlobDB2Response.WriteResponse(message.token, result)
+                        WriteType.WriteBack -> BlobDB2Response.WriteBackResponse(
+                            message.token,
+                            result
+                        )
+                    }
+                    blobDBService.sendResponse(response)
+                }
+            }
+
+            watchScope.launch {
+                blobDBService.syncCompletes.collect {
+                    databasesWhichWillSync.value -= it
+                }
+            }
+
+            // TODO probably a timeout?
+            databasesWhichWillSync.first { it.isEmpty() }
+
+            // FIXME (doesn't work - want it to send us all items, not just dirty, and would want that on unfaithful + first time connected to a settings-enabled watch)
+            blobDBService.startSync(BlobDatabase.WatchPrefs)
+
             if (unfaithful || !previouslyConnected) {
                 logger.d("unfaithful: wiping DBs on watch")
                 // Clear all DBs on watch (whether we have local DBs for them or not)
                 BlobDatabase.entries.forEach { db ->
-                    sendWithTimeout(
-                        BlobCommand.ClearCommand(
-                            token = generateToken(),
-                            database = db,
+                    if (db.sendClear) {
+                        sendWithTimeout(
+                            BlobCommand.ClearCommand(
+                                token = generateToken(),
+                                database = db,
+                            )
                         )
-                    )
-                }
-                // Mark all of our local DBs not synched
-                blobDatabases.get().forEach { db ->
-                    db.markAllDeletedFromWatch(identifier.asString)
+                    }
                 }
             }
 
@@ -170,19 +218,6 @@ class BlobDB(
                         }
                     }
                 }
-            }
-
-            blobDBService.writes.collect { message ->
-                val dao = blobDatabases.get().find { it.databaseId() == message.database }
-                val result = dao?.handleWrite(
-                    write = message,
-                    transport = identifier.asString,
-                ) ?: BlobResponse.BlobStatus.Success
-                val response = when (message.writeType) {
-                    WriteType.Write -> BlobDB2Response.WriteResponse(message.token, result)
-                    WriteType.WriteBack -> BlobDB2Response.WriteBackResponse(message.token, result)
-                }
-                blobDBService.sendResponse(response)
             }
         }
     }

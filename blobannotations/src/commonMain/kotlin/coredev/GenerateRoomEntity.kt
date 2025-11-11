@@ -16,7 +16,7 @@ annotation class GenerateRoomEntity(
 )
 
 // TODO move somewhere better
-enum class BlobDatabase(val id: UByte) {
+enum class BlobDatabase(val id: UByte, val sendClear: Boolean = true) {
     Test(0u),
     Pin(1u),
     App(2u),
@@ -29,6 +29,7 @@ enum class BlobDatabase(val id: UByte) {
     AppConfigs(9u),
     HealthStats(10u),
     AppGlance(11u),
+    WatchPrefs(12u, sendClear = false),
     Invalid(0xFFu),
     ;
     companion object {

@@ -279,7 +279,7 @@ class SNullTerminatedString(mapper: StructMapper, default: String = "") :
             buf.putUByte(0u)
         },
         getType = { buf, el ->
-            throw UnsupportedOperationException("SNullTerminatedString is upload-only")
+            buf.array().asByteArray().decodeToString().trimEnd('\u0000')
         }, mapper = mapper, size = default.length + 1, default = default,
     )
 
