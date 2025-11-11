@@ -13,11 +13,10 @@ import kotlinx.coroutines.flow.callbackFlow
 /**
  * Consume intents from specific IntentFilter as coroutine flow
  * @param context Context to register the BroadcastReceiver with
- * @param exported Whether the receiver should be exported or not. If null, default system behavior
- * is used.
+ * @param exported Whether the receiver should be exported or not.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
-fun IntentFilter.asFlow(context: Context, exported: Boolean? = null): Flow<Intent> = callbackFlow {
+fun IntentFilter.asFlow(context: Context, exported: Boolean): Flow<Intent> = callbackFlow {
     val receiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             trySend(intent).isSuccess
@@ -31,7 +30,6 @@ fun IntentFilter.asFlow(context: Context, exported: Boolean? = null): Flow<Inten
         when (exported) {
             true -> ContextCompat.RECEIVER_EXPORTED
             false -> ContextCompat.RECEIVER_NOT_EXPORTED
-            null -> 0
         },
     )
 

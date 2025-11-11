@@ -38,7 +38,7 @@ actual fun getBluetoothDevicePairEvents(
     identifier: PebbleBleIdentifier,
     connectivity: Flow<ConnectivityStatus>,
 ): Flow<BluetoothDevicePairEvent> {
-    return IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED).asFlow(context.context)
+    return IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED).asFlow(context.context, exported = true)
         .mapNotNull {
             val device: BluetoothDevice = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 it.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE, BluetoothDevice::class.java)
