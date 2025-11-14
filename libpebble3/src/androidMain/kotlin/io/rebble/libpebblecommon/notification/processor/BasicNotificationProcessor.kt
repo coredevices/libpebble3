@@ -176,7 +176,7 @@ fun StatusBarNotification.icon(): TimelineIcon = when (packageName) {
     "com.Slack" -> TimelineIcon.NotificationSlack
     "com.snapchat.android" -> TimelineIcon.NotificationSnapchat
     "com.twitter.android", "com.twitter.android.lite" -> TimelineIcon.NotificationTwitter
-    "org.telegram.messenger" -> TimelineIcon.NotificationTelegram
+    "org.telegram.messenger", "org.telegram.messenger.web", "org.thunderdog.challegram" -> TimelineIcon.NotificationTelegram
     "com.facebook.katana", "com.facebook.lite" -> TimelineIcon.NotificationFacebook
     "com.facebook.orca" -> TimelineIcon.NotificationFacebookMessenger
     "com.whatsapp" -> TimelineIcon.NotificationWhatsapp
