@@ -60,11 +60,15 @@ interface LockerEntryRealDao : LockerEntryDao {
 
     @Transaction
     suspend fun setOrder(id: Uuid, orderIndex: Int, syncLimit: Int) {
-        updateOrder(id, orderIndex)
-        // Could lookup which type it is I guess
-        AppType.entries.forEach {
-            updateOrder(it.code)
+        val entry = getEntry(id) ?: return
+        val oldOrder = entry.orderIndex
+        if (oldOrder > orderIndex) {
+            incrementOrderIndexes(orderIndex, oldOrder, entry.type)
+        } else {
+            decrementOrderIndexes(oldOrder, orderIndex, entry.type)
         }
+        updateOrder(id, orderIndex)
+        updateOrder(entry.type)
         updateSync(syncLimit)
     }
 
@@ -77,6 +81,21 @@ interface LockerEntryRealDao : LockerEntryDao {
         WHERE id = :id
     """)
     suspend fun updateOrder(id: Uuid, orderIndex: Int)
+
+    @Query("""
+        UPDATE LockerEntryEntity
+        SET orderIndex = orderIndex + 1
+        WHERE orderIndex BETWEEN :fromIndex AND :toIndex AND type = :type;
+    """)
+    suspend fun incrementOrderIndexes(fromIndex: Int, toIndex: Int, type: String)
+
+    @Query("""
+        UPDATE LockerEntryEntity
+        SET orderIndex = orderIndex - 1
+        WHERE orderIndex BETWEEN :fromIndex AND :toIndex AND type = :type;
+    """)
+    suspend fun decrementOrderIndexes(fromIndex: Int, toIndex: Int, type: String)
+
 
     @Query("""
         WITH Ordered AS (
@@ -105,6 +124,7 @@ interface LockerEntryRealDao : LockerEntryDao {
     @Query("""
         UPDATE LockerEntryEntity
         SET sync = CASE
+            WHEN systemApp = 1 THEN 0
             WHEN orderIndex < :syncLimit THEN 1
             ELSE 0
         END

@@ -2,7 +2,6 @@ package io.rebble.libpebblecommon.database.entity
 
 import androidx.room.ColumnInfo
 import androidx.room.Embedded
-import androidx.room.Index
 import co.touchlab.kermit.Logger
 import coredev.BlobDatabase
 import coredev.GenerateRoomEntity
@@ -13,7 +12,6 @@ import io.rebble.libpebblecommon.packets.ProtocolCapsFlag
 import io.rebble.libpebblecommon.packets.blobdb.AppMetadata
 import io.rebble.libpebblecommon.structmapper.SUUID
 import io.rebble.libpebblecommon.structmapper.StructMapper
-import io.rebble.libpebblecommon.web.LockerEntryCompanionApp
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlin.uuid.Uuid
@@ -47,6 +45,8 @@ data class LockerEntry(
 
     @ColumnInfo(defaultValue = "0")
     val orderIndex: Int = 0,
+    @ColumnInfo(defaultValue = "0")
+    val systemApp: Boolean = false,
 ) : BlobDbItem {
     override fun key(): UByteArray = SUUID(StructMapper(), id).toBytes()
 

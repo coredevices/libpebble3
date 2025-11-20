@@ -3,19 +3,8 @@ package io.rebble.libpebblecommon.connection.endpointmanager
 import co.touchlab.kermit.Logger
 import com.russhwolf.settings.Settings
 import com.russhwolf.settings.set
-import io.rebble.libpebblecommon.SystemAppIDs.ALARMS_APP_UUID
-import io.rebble.libpebblecommon.SystemAppIDs.CALENDAR_APP_UUID
-import io.rebble.libpebblecommon.SystemAppIDs.HEALTH_APP_UUID
 import io.rebble.libpebblecommon.SystemAppIDs.KICKSTART_APP_UUID
-import io.rebble.libpebblecommon.SystemAppIDs.MUSIC_APP_UUID
-import io.rebble.libpebblecommon.SystemAppIDs.NOTIFICATIONS_APP_UUID
-import io.rebble.libpebblecommon.SystemAppIDs.REMINDERS_APP_UUID
-import io.rebble.libpebblecommon.SystemAppIDs.SETTINGS_APP_UUID
-import io.rebble.libpebblecommon.SystemAppIDs.SMS_APP_UUID
 import io.rebble.libpebblecommon.SystemAppIDs.TICTOC_APP_UUID
-import io.rebble.libpebblecommon.SystemAppIDs.WATCHFACES_APP_UUID
-import io.rebble.libpebblecommon.SystemAppIDs.WEATHER_APP_UUID
-import io.rebble.libpebblecommon.SystemAppIDs.WORKOUT_APP_UUID
 import io.rebble.libpebblecommon.WatchConfigFlow
 import io.rebble.libpebblecommon.connection.PebbleIdentifier
 import io.rebble.libpebblecommon.database.dao.LockerEntryRealDao
@@ -42,15 +31,14 @@ class AppOrderManager(
     private val settingsKey = "app_order_-${identifier.asString}"
     private var stored: AppOrder = settings.getStringOrNull(settingsKey)?.let {
         json.decodeFromString(it)
-    } ?: AppOrder(emptyList(),emptyList())
+    } ?: AppOrder(emptyList(), emptyList())
 
     fun init() {
         connectionScope.launch {
             lockerDao.getAppOrderFlow(
                 type = AppType.Watchapp.code,
                 limit = watchConfigFlow.value.lockerSyncLimit,
-            ).distinctUntilChanged().collect {
-                val newOrder = SYSTEM_APPS + it
+            ).distinctUntilChanged().collect { newOrder ->
                 if (newOrder != stored.watchapps) {
                     stored = stored.copy(watchapps = newOrder)
                     updateOrder()
@@ -78,19 +66,6 @@ class AppOrderManager(
     }
 
     companion object {
-        private val SYSTEM_APPS = listOf<Uuid>(
-            SETTINGS_APP_UUID,
-            CALENDAR_APP_UUID,
-            WEATHER_APP_UUID,
-            HEALTH_APP_UUID,
-            MUSIC_APP_UUID,
-            NOTIFICATIONS_APP_UUID,
-            ALARMS_APP_UUID,
-            SMS_APP_UUID,
-            REMINDERS_APP_UUID,
-            WORKOUT_APP_UUID,
-            WATCHFACES_APP_UUID,
-        )
         private val SYSTEM_FACES = listOf<Uuid>(
             TICTOC_APP_UUID,
             KICKSTART_APP_UUID,

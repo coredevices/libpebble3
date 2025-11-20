@@ -37,6 +37,7 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
 import kotlinx.io.IOException
 import kotlinx.io.Source
@@ -63,6 +64,7 @@ class Locker(
     private val webSyncManagerProvider: WebSyncManagerProvider,
     private val timeProvider: TimeProvider,
     private val errorTracker: ErrorTracker,
+    private val coroutineScope: LibPebbleCoroutineScope,
 ) : LockerApi {
     private val lockerEntryDao = database.lockerEntryDao()
 
@@ -92,11 +94,12 @@ class Locker(
     ): Flow<List<LockerWrapper>> =
         lockerEntryDao.getAllFlow(type.code, searchQuery, limit)
             .map { entries ->
-                SystemApps.entries.filter { it.type == type }
-                    .map { systemApp ->
-                        systemApp.wrap(0)
-                    } + entries.mapNotNull { app ->
-                    app.wrap(config)
+                entries.mapNotNull { app ->
+                    if (app.systemApp) {
+                        findSystemApp(app.id)?.wrap(app.orderIndex)
+                    } else {
+                        app.wrap(config)
+                    }
                 }
             }
 
@@ -239,6 +242,43 @@ class Locker(
         } catch (e: TimeoutCancellationException) {
             logger.w { "Timeout while waiting for app to sync+launch on watches" }
             false
+        }
+    }
+
+    fun init() {
+        coroutineScope.launch {
+            val lockerApps = getLocker(AppType.Watchapp, null, Int.MAX_VALUE)
+                .first()
+                .map { it.properties.id }
+
+            val systemAppsToInsert = SystemApps.entries.filter { !lockerApps.contains(it.uuid) }
+                .map { systemApp ->
+                    LockerEntry(
+                        id = systemApp.uuid,
+                        version = "",
+                        title = systemApp.name,
+                        type = systemApp.type.code,
+                        developerName = "",
+                        configurable = false,
+                        "",
+                        platforms = systemApp.compatiblePlatforms.map {
+                            LockerEntryPlatform(
+                                lockerEntryId = systemApp.uuid,
+                                sdkVersion = "",
+                                processInfoFlags = 0,
+                                name = it.codename,
+                                pbwIconResourceId = 0
+
+                            )
+
+                        },
+                        systemApp = true
+                    )
+                }
+
+            if (systemAppsToInsert.isNotEmpty()) {
+                lockerEntryDao.insertOrReplaceAndOrder(systemAppsToInsert, config.value.lockerSyncLimit)
+            }
         }
     }
 }

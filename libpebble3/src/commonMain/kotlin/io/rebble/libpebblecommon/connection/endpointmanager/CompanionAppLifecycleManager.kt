@@ -106,7 +106,11 @@ class CompanionAppLifecycleManager(
             handleAppStop()
             if (it != null) {
                 val lockerEntry = lockerEntryDao.getEntry(it)
-                lockerEntry?.let { handleNewRunningApp(lockerEntry, scope) }
+                lockerEntry?.let {
+                    if (!it.systemApp) {
+                        handleNewRunningApp(lockerEntry, scope)
+                    }
+                }
             }
         }.onCompletion {
             // Unsure if this is needed
