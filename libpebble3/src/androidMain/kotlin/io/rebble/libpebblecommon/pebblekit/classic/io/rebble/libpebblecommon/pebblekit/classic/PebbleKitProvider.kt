@@ -1,4 +1,4 @@
-package io.rebble.libpebblecommon.pebblekit
+package io.rebble.libpebblecommon.pebblekit.classic
 
 import android.content.ContentProvider
 import android.content.ContentValues
@@ -150,4 +150,3 @@ private const val KIT_STATE_COLUMN_VERSION_MINOR = 4
 private const val KIT_STATE_COLUMN_VERSION_POINT = 5
 
 private const val KIT_STATE_COLUMN_VERSION_TAG = 6
-

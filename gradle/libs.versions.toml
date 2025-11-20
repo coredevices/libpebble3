@@ -25,6 +25,7 @@ androidx-core = "1.17.0"
 monitorVersion = "1.8.0"
 androidXTestVersion = "1.7.0"
 androidXRulesVersion = "1.7.0"
+pebblekit = "0.0.0"
 
 [plugins]
 composeMultiplatform = { id = "org.jetbrains.compose", version.ref = "compose-multiplatform" }
@@ -69,6 +70,9 @@ kotlinx-io-okio = { module = "org.jetbrains.kotlinx:kotlinx-io-okio", version.re
 koin-core = { group = "io.insert-koin", name = "koin-core", version.ref = "koin" }
 koin-compose = { group = "io.insert-koin", name = "koin-compose", version.ref = "koin" }
 koin-compose-viewmodel = { group = "io.insert-koin", name = "koin-compose-viewmodel", version.ref = "koin" }
+# Synthetic library declaration that then gets replaced with the included pebblekit, until
+# it is stable enough to make a release
+pebblekit = { module = "io.rebble.pebblekit2:server", version.ref = "pebblekit" }
 settings = { group = "com.russhwolf", name = "multiplatform-settings-no-arg", version.ref = "settings" }
 settings-serialization = { group = "com.russhwolf", name = "multiplatform-settings-serialization", version.ref = "settings" }
 kable = { group = "com.juul.kable", name = "kable-core", version.ref = "kable" }

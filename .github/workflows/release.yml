@@ -11,7 +11,7 @@ jobs:
       - name: Setup JDK
         uses: actions/setup-java@v1.4.4
         with:
-          java-version: 17
+          java-version: 21
       - name: Checkout source
         uses: actions/checkout@v4
       - name: Cache build deps
@@ -22,7 +22,7 @@ jobs:
             ~/.konan/cache
             ~/.konan/dependencies
           key: build-deps-${{ runner.os }}-${{ hashFiles('gradle/**', 'gradlew*', 'gradle.properties', '*.gradle*') }}
-      
+
       - name: Build XCFrameworks
         run: ./gradlew assembleXCFramework
 
@@ -44,7 +44,7 @@ jobs:
         run: |
           cp Package.swift.template Package.swift
           echo RELEASE_CHECKSUM=$(swift package compute-checksum build/xcframework.zip) >> $GITHUB_ENV
-        
+
       - name: Checkout master
         uses: actions/checkout@v2
         with:

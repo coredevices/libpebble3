@@ -1,4 +1,4 @@
-package io.rebble.libpebblecommon.pebblekit
+package io.rebble.libpebblecommon.pebblekit.classic
 
 import android.content.Context
 import android.content.IntentFilter

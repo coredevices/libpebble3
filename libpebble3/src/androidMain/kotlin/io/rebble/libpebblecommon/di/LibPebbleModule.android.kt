@@ -29,8 +29,8 @@ import io.rebble.libpebblecommon.notification.NotificationListenerConnection
 import io.rebble.libpebblecommon.notification.processor.BasicNotificationProcessor
 import io.rebble.libpebblecommon.packets.PhoneAppVersion
 import io.rebble.libpebblecommon.packets.ProtocolCapsFlag
-import io.rebble.libpebblecommon.pebblekit.PebbleKitClassicStartListeners
-import io.rebble.libpebblecommon.pebblekit.PebbleKitProviderNotifier
+import io.rebble.libpebblecommon.pebblekit.classic.PebbleKitClassicStartListeners
+import io.rebble.libpebblecommon.pebblekit.classic.PebbleKitProviderNotifier
 import io.rebble.libpebblecommon.util.OtherPebbleAndroidApps
 import io.rebble.libpebblecommon.util.SystemGeolocation
 import org.koin.core.module.Module

@@ -1,10 +1,10 @@
-package io.rebble.libpebblecommon.pebblekit
+package io.rebble.libpebblecommon.pebblekit.classic
 
 import java.nio.charset.Charset
 import java.util.Locale
 
 /**
- * A key-value pair stored in a [PebbleDictionary].
+ * A key-value pair stored in a [PebbleClassicDictionary].
  *
  * This is a copy of the file from the original Pebble SDK, converted to Kotlin
  *
@@ -114,4 +114,3 @@ class PebbleTuple private constructor(
         }
     }
 }
-

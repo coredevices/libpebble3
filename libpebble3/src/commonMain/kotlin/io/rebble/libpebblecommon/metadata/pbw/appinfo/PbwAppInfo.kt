@@ -16,5 +16,6 @@ data class PbwAppInfo(
     val sdkVersion: String = "3",
     // If list of target platforms is not present, pbw is legacy applite app
     val targetPlatforms: List<String> = listOf("aplite"),
-    val watchapp: Watchapp = Watchapp()
+    val watchapp: Watchapp = Watchapp(),
+    val companionApp: CompanionApp? = null,
 )

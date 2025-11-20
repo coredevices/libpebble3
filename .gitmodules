@@ -1,0 +1,3 @@
+[submodule "PebbleKitAndroid2"]
+	path = PebbleKitAndroid2
+	url = https://github.com/pebble-dev/PebbleKitAndroid2.git

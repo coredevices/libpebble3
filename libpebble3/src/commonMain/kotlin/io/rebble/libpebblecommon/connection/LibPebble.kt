@@ -95,6 +95,12 @@ sealed class UserFacingError {
     data class FailedToRemovePbwFromLocker(override val message: String) : UserFacingError()
     data class FailedToSideloadApp(override val message: String) : UserFacingError()
     data class FailedToScan(override val message: String) : UserFacingError()
+    data class MissingCompanionApp(
+        override val message: String,
+        val appName: String,
+        val appUuid: Uuid,
+        val downloadUrl: String?
+    ) : UserFacingError()
 }
 
 data class OtherPebbleApp(

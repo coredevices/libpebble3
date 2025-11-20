@@ -39,6 +39,8 @@
     <uses-feature android:name="android.hardware.bluetooth_le" android:required="false"/>
     <uses-feature android:name="android.software.companion_device_setup"/>
 
+    <uses-permission android:name="io.rebble.pebblekit2.permission.RECEIVE_DATA_FROM_WATCH" />
+
     <application>
         <service android:name="io.rebble.libpebblecommon.notification.LibPebbleNotificationListener"
             android:exported="true"
@@ -60,6 +62,14 @@
             android:permission="android.permission.BIND_INCALL_SERVICE">
             <intent-filter>
                 <action android:name="android.telecom.InCallService" />
+            </intent-filter>
+        </service>
+
+        <service android:name="io.rebble.libpebblecommon.pebblekit.two.PebbleSenderReceiver"
+                 android:exported="true"
+                 android:permission="io.rebble.pebblekit2.permission.SEND_DATA_TO_WATCH">
+            <intent-filter>
+                <action android:name="io.rebble.pebblekit2.SEND_DATA_TO_WATCH"/>
             </intent-filter>
         </service>
     </application>

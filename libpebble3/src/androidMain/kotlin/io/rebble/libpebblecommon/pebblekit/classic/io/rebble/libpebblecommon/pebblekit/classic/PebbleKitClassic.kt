@@ -1,4 +1,4 @@
-package io.rebble.libpebblecommon.pebblekit
+package io.rebble.libpebblecommon.pebblekit.classic
 
 import android.content.Context
 import android.content.Intent
@@ -98,7 +98,7 @@ class PebbleKitClassic(
             IntentFilter(INTENT_APP_SEND).asFlow(context, exported = true).collect { intent ->
                 logger.d { "Got outbound message" }
                 val uuid = intent.getSerializableExtra(APP_UUID) as UUID? ?: return@collect
-                val dictionary: PebbleDictionary = PebbleDictionary.fromJson(
+                val dictionary: PebbleClassicDictionary = PebbleClassicDictionary.fromJson(
                     intent.getStringExtra(MSG_DATA)
                 )
                 val transactionId: Int = intent.getIntExtra(TRANSACTION_ID, 0)
@@ -137,7 +137,7 @@ class PebbleKitClassic(
     }
 }
 
-private fun PebbleDictionary.toAppMessageDict(): AppMessageDictionary {
+private fun PebbleClassicDictionary.toAppMessageDict(): AppMessageDictionary {
     return tuples.mapValues {
         when (it.value.type) {
             PebbleTuple.TupleType.BYTES -> it.value.value as ByteArray
@@ -159,8 +159,8 @@ private fun PebbleDictionary.toAppMessageDict(): AppMessageDictionary {
     }
 }
 
-private fun AppMessageDictionary.toPebbleDictionary(): PebbleDictionary {
-    val dict = PebbleDictionary()
+private fun AppMessageDictionary.toPebbleDictionary(): PebbleClassicDictionary {
+    val dict = PebbleClassicDictionary()
     for ((k, value) in this) {
         when (value) {
             is String -> dict.addString(k, value)
